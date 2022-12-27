@@ -3,7 +3,7 @@ library(graph)
 library(MASS)
 library(tictoc)
 
-source("cuPC.R")
+source("../cupc/cuPC.R")
 #
 # # read data
 dataset_path <- file.path("../regulondb2/data_smaller.csv", fsep=.Platform$file.sep)

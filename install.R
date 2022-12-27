@@ -1,5 +1,5 @@
 install.packages("tictoc", repos = "http://cran.us.r-project.org")
 install.packages("BiocManager", repos="http://cran.us.r-project.org")
 library(BiocManager)
-BiocManager::install(c("graph", "RBGL", "Rgraph"), lib="/homes/shahashka/gies_libs")
+BiocManager::install(c("graph", "RBGL"))
 install.packages("pcalg", repos = "http://cran.us.r-project.org")

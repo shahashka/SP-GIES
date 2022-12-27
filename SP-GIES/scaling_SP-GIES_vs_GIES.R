@@ -4,11 +4,11 @@ library(MASS)
 library(tictoc)
 library(igraph)
 
-source("cuPC.R")
+source("../cupc/cuPC.R")
 
 run_sp_gies <- function(num_nodes) {
 # # read data
-dataset_path <- file.path(paste("../test_set_random_fewer",string(num_nodes),"_small/data_0.csv"), fsep=.Platform$file.sep)
+dataset_path <- file.path(paste("../test_set_random_fewer",as.character(num_nodes),"_small/data_0.csv", sep=""), fsep=.Platform$file.sep)
 dataset <- read.table(dataset_path, sep=",", header=TRUE)
 
 tic()
@@ -35,7 +35,7 @@ toc()
 
 run_gies <- function(num_nodes) {
 # # read data
-dataset_path <- file.path(paste("../test_set_random_fewer",string(num_nodes),"_small/data_0.csv"), fsep=.Platform$file.sep)
+dataset_path <- file.path(paste("../test_set_random_fewer",as.character(num_nodes),"_small/data_0.csv", sep=""), fsep=.Platform$file.sep)
 dataset <- read.table(dataset_path, sep=",", header=TRUE)
 
 tic()
@@ -54,7 +54,7 @@ toc()
 }
 
 
-graph_nodes <- list(10,100,1000,2000,3000,4000,5000)
+graph_nodes <- list(10,100,1000)
 num_repeats = 3
 for (n in 1:num_repeats) {
     for (i in graph_nodes) {
@@ -73,16 +73,16 @@ for (n in 1:num_repeats) {
 }
 
 # let's see if it can run the largest one as a test
-for (n in 1:num_repeats) {
-print("Number of nodes is 10,000")
-run_sp_gies(10000)
-print("\n")
-}
+#for (n in 1:num_repeats) {
+#print("Number of nodes is 10,000")
+#run_sp_gies(10000)
+#print("\n")
+#}
 
 # let's see if it can run the largest one as a test
-for (n in 1:num_repeats) {
-print("Number of nodes is 10,000")
-run_gies(10000)
-print("\n")
-}
+#for (n in 1:num_repeats) {
+#print("Number of nodes is 10,000")
+#run_gies(10000)
+#print("\n")
+#}
 

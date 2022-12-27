@@ -104,6 +104,7 @@ dependencies:
   - zlib=1.2.13=h5eee18b_0
   - zstd=1.5.2=ha4553b6_0
   - pip:
+    - causaldag
     - cdt==0.6.0
     - charset-normalizer==2.1.1
     - contourpy==1.0.6
@@ -124,4 +125,3 @@ dependencies:
     - skrebate==0.62
     - statsmodels==0.13.5
     - threadpoolctl==3.1.0
-prefix: /homes/shahashka/.conda/envs/python3r4

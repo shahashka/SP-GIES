@@ -7,7 +7,7 @@ source("../cupc/cuPC.R")
 #
 # # read data
 dataset_path <- file.path("../regulondb2/data_smaller.csv", fsep=.Platform$file.sep)
-dataset <- read.table(dataset_path, sep=",", header=TRUE)
+dataset <- read.table(dataset_path, sep=",", header=FALSE)
 print(dim(dataset))
 
 tic()
@@ -25,13 +25,15 @@ targets <- split(targets, 1:nrow(targets))
 targets <- lapply(targets, function(x) x[!is.na(x)])
 targets_init <- list(integer(0))
 targets <- append(targets_init, targets)
+
 fixedGaps <- as(cuPC_fit@graph,"matrix")
 fixedGaps <- as.data.frame(fixedGaps)
 fixedGaps <- fixedGaps == 0
 class(fixedGaps) <- "logical"
-fixedGaps <- NULL
+
 targets.index <- read.table("../regulondb2/target_index.csv", sep=",", header=FALSE)
 targets.index <- unlist(targets.index)
+print(targets.index)
 
 tic()
 score <- new("GaussL0penIntScore", data = dataset, targets=targets, target.index=targets.index)

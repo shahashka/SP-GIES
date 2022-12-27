@@ -60,7 +60,7 @@ def test_regulondb():
     aracne_network = pd.read_csv("./regulondb2/output/network2.txt", sep='\t',header=0)
     clr_network = pd.read_csv("./regulondb2/adj_mat.csv", header=None).to_numpy()
     #pc_network = pd.read_csv("./regulondb2/cupc_adj_mat.csv", header=0).to_numpy()
-    sp_gies_network = pd.read_csv("./cupc/sp-gies-adj_mat.csv", header=0).to_numpy()
+    sp_gies_network = pd.read_csv("./regulondb2/sp-gies-adj_mat.csv", header=0).to_numpy()
     #gies_network =  pd.read_csv("./regulondb2/gies-adj_mat.csv", header=0).to_numpy()
     #print(pc_network.shape)
     inds = pd.read_csv("./regulondb2/inds.csv", header=None, sep=",").iloc[0].values
@@ -79,7 +79,7 @@ def test_regulondb():
     clr_graph = adj_to_dag(clr_network,genes)
 
     shd = cdt.metrics.SHD(true_graph, aracne_graph, False)
-    sid = 0 #cdt.metrics.SID(true_graph, aracne_graph)
+    sid = cdt.metrics.SID(true_graph, aracne_graph)
 
     auc,pr = cdt.metrics.precision_recall(true_graph,aracne_graph)
     print("ARACNE {} {} {}".format( shd, sid, auc))

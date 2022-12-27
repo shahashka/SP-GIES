@@ -24,7 +24,6 @@ targets <- append(targets_init, targets)
 fixedGaps <- as(cuPC_fit@graph,"matrix")
 fixedGaps <- fixedGaps == 0
 class(fixedGaps) <- "logical"
-fixedGaps <- NULL
 targets.index <- read.table("../regulondb2/target_index.csv", sep=",", header=FALSE)
 targets.index <- unlist(targets.index)
 score <- new("GaussL0penIntScore", data = dataset, targets=targets, target.index=targets.index)
@@ -44,7 +43,6 @@ targets <- split(targets, 1:nrow(targets))
 targets <- lapply(targets, function(x) x[!is.na(x)])
 targets_init <- list(integer(0))
 targets <- append(targets_init, targets)
-fixedGaps <- NULL
 targets.index <- read.table("../regulondb2/target_index.csv", sep=",", header=FALSE)
 targets.index <- unlist(targets.index)
 score <- new("GaussL0penIntScore", data = dataset, targets=targets, target.index=targets.index)

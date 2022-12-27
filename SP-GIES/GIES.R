@@ -5,7 +5,7 @@ library(tictoc)
 
 # # read data
 dataset_path <- file.path("../regulondb2/data_smaller.csv", fsep=.Platform$file.sep)
-dataset <- read.table(dataset_path, sep=",", header=TRUE)
+dataset <- read.table(dataset_path, sep=",", header=FALSE)
 print(dim(dataset))
 
 targets <- read.table("../regulondb2/targets.csv", sep=",", header=FALSE)
@@ -13,7 +13,6 @@ targets <- split(targets, 1:nrow(targets))
 targets <- lapply(targets, function(x) x[!is.na(x)])
 targets_init <- list(integer(0))
 targets <- append(targets_init, targets)
-class(fixedGaps) <- "logical"
 
 targets.index <- read.table("../regulondb2/target_index.csv", sep=",", header=FALSE)
 targets.index <- unlist(targets.index)

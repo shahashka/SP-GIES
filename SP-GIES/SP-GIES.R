@@ -10,10 +10,10 @@ dataset_path <- file.path("../regulondb2/data_smaller.csv", fsep=.Platform$file.
 target_path <- file.path("../regulondb2/targets.csv", fsep=.Platform$file.sep)
 target_index_path <- file.path("../regulondb2/target_index.csv", fsep=.Platform$file.sep)
 
-run_from_file_sp_gies <- function(dataset_path, target_path, target_index_path, header) {
-    dataset <- read.table(dataset_path, sep=",", header=header)
-    targets <- read.table(target_path, sep=",", header=header)
-    targets.index <- read.table(target_index_path, sep=",", header=header)
+run_from_file_sp_gies <- function(dataset_path, target_path, target_index_path) {
+    dataset <- read.table(dataset_path, sep=",", header=FALSE)
+    targets <- read.table(target_path, sep=",", header=FALSE)
+    targets.index <- read.table(target_index_path, sep=",", header=FALSE)
     print(dim(dataset))
 
     targets <- split(targets, 1:nrow(targets))
@@ -45,4 +45,4 @@ sp_gies <- function(dataset, targets, targets.index) {
     write.csv(result$repr$weight.mat() ,row.names = FALSE, file = 'sp-gies-adj_mat.csv');
  }
 
- run_from_file_sp_gies(dataset_path, target_path, target_index_path)
+ #run_from_file_sp_gies(dataset_path, target_path, target_index_path)

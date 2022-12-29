@@ -11,23 +11,26 @@ source("SP-GIES.R")
 
 run_sp_gies <- function(num_nodes) {
     # # read data
-    dataset_path <- file.path(paste("../test_set_random_fewer",as.character(num_nodes),"_small/data_0.csv", sep=""), fsep=.Platform$file.sep)
-    dataset <- read.table(dataset_path, sep=",", header=FALSE)
+    dataset_path <- file.path(paste("../random_test_set_fewer_",as.character(num_nodes),"_small/data_joint_0.csv", sep=""), fsep=.Platform$file.sep)
+    dataset <- read.table(dataset_path, sep=",", header=TRUE)
     # load target, target index files
     targets.index <- dataset[,ncol(dataset)]
-    targets <- as.matrix(unique(targets.index)) + 1
+    targets <- as.matrix(unique(targets.index))
+    targets <- targets[targets > 0]
     targets_init <- list(integer(0))
     targets <- append(targets_init, targets)
     dataset <- dataset[,1:ncol(dataset)-1]
+    targets.index <- targets.index + 1
     sp_gies(dataset, targets, targets.index)
 }
 
 run_gies <- function(num_nodes) {
     # # read data
-    dataset_path <- file.path(paste("../test_set_random_fewer",as.character(num_nodes),"_small/data_0.csv", sep=""), fsep=.Platform$file.sep)
+    dataset_path <- file.path(paste("../random_test_set_fewer_",as.character(num_nodes),"_small/data_0.csv", sep=""), fsep=.Platform$file.sep)
     # load target, target index files
     targets.index <- dataset[,ncol(dataset)]
-    targets <- as.matrix(unique(targets.index)) + 1
+    targets <- as.matrix(unique(targets.index))
+    targets <- targets[targets > 0]
     targets_init <- list(integer(0))
     targets <- append(targets_init, targets)
     dataset <- dataset[,1:ncol(dataset)-1]
@@ -39,15 +42,14 @@ graph_nodes <- list(10,100,1000)
 num_repeats = 3
 for (n in 1:num_repeats) {
     for (i in graph_nodes) {
-        print("Number of nodes is ", i)
+        print(paste("Number of nodes is ", i))
         run_sp_gies(i)
-        print("\n")
     }
 }
 
 for (n in 1:num_repeats) {
     for (i in graph_nodes) {
-        print("Number of nodes is ", i)
+        print(paste("Number of nodes is ", i))
         run_gies(i)
         print("\n")
     }

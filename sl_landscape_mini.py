@@ -34,16 +34,17 @@ def edge_to_adj(edges, all_nodes):
         adj_mat[start,end] = 1
     return adj_mat
 
-def edge_to_dag(edges, weights=None):
+def edge_to_dag(edges):
     dag = nx.DiGraph()
     dag.add_edges_from(edges)
     return dag
-# Report the SHD, nx graph for a gies run                                                                              
+
+# Report the SHD, nx graph for a gies run
 def gies_run(df, true_graph, targets, target_index, fixedGaps=None):
     if targets is not None:
         targets = pd.DataFrame(data=targets)
         target_index = pd.DataFrame(data=target_index)
-    # GIES W INTERVENTIONS                                                                                             
+    # GIES W INTERVENTIONS
     obj = GIES(score="int", verbose=True)
     output = obj.create_graph_from_data(df, targets, target_index, fixedGaps=fixedGaps)[0]
     shd = cdt.metrics.SHD(true_graph, output, False)

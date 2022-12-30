@@ -119,7 +119,8 @@ def test_regulondb():
                 np.zeros((len(genes), len(genes)))], true_graph)
 
 def test_random():
-    random = [ "small_norm"]
+    # TODO average over x number of graphs 1000 node network
+    random = [ "small"]
     num_graphs = 1
     for r in random:
         stats_clr = np.zeros(3)
@@ -172,6 +173,7 @@ def test_random():
         print(stats_empty)
 
 def test_dream4():
+    # TODO only dream4 network 3
     for d in range(1,6):
         print("NETWORK {}".format(d))
         edges = pd.read_csv("./insilico_size10_{}/insilico_size10_{}_goldstandard.csv".format(d, d), header=0)

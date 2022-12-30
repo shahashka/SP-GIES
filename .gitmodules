@@ -1,3 +1,6 @@
 [submodule "cupc"]
 	path = cupc
 	url = https://github.com/LIS-Laboratory/cupc.git
+[submodule "CausalDiscoveryToolbox"]
+	path = CausalDiscoveryToolbox
+	url = https://github.com/shahashka/CausalDiscoveryToolbox.git

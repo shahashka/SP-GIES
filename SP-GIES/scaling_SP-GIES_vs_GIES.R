@@ -21,7 +21,7 @@ run_sp_gies <- function(num_nodes) {
     targets <- append(targets_init, targets)
     dataset <- dataset[,1:ncol(dataset)-1]
     targets.index <- targets.index + 1
-    sp_gies(dataset, targets, targets.index)
+    sp_gies(dataset, targets, targets.index, save_path="./")
 }
 
 run_gies <- function(num_nodes) {
@@ -34,7 +34,7 @@ run_gies <- function(num_nodes) {
     targets_init <- list(integer(0))
     targets <- append(targets_init, targets)
     dataset <- dataset[,1:ncol(dataset)-1]
-    gies(dataset, targets, targets.index)
+    gies(dataset, targets, targets.index, save_path="./")
 }
 
 

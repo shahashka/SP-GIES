@@ -75,13 +75,13 @@ def test_regulondb():
     clr_network = pd.read_csv("./regulondb/adj_mat.csv", header=None).to_numpy()
     sp_gies_network = pd.read_csv("./regulondb/sp-gies-adj_mat.csv", header=0).to_numpy()
     gies_network =  pd.read_csv("./regulondb/gies-adj_mat.csv", header=0).to_numpy()
-    gies_o_network =  pd.read_csv("./regulondb/gies-o-adj_mat.csv", header=0).to_numpy()
+    # gies_o_network =  pd.read_csv("./regulondb/gies-o-adj_mat.csv", header=0).to_numpy()
     pc_network = pd.read_csv("./regulondb/cupc_adj_mat.csv", header=0).to_numpy()
 
     inds = pd.read_csv("./regulondb/inds.csv", header=None, sep=",").iloc[0].values
 
     #  zero out gene->gene and gene-> tf interactions
-    with open('./regulondb/tfs_names.txt') as f:
+    with open('./regulondb/tfs.txt') as f:
         lines = f.readlines()
     tfs = lines[0].split("\t")
     edges_pos = [(row['Regulator'][1:-1], row['Target'][1:-1])
@@ -98,7 +98,7 @@ def test_regulondb():
     pc_graph = adj_to_dag(pc_network, genes)
     sp_gies_graph = adj_to_dag(sp_gies_network, genes)
     gies_graph = adj_to_dag(gies_network, genes)
-    gies_o_graph = adj_to_dag(gies_o_network, genes)
+    # gies_o_graph = adj_to_dag(gies_o_network, genes)
 
     get_scores(["ARACNE-AP", "CLR",  "SP-GIES-OI", "EMPTY"],
                [aracne_graph, clr_graph, sp_gies_graph,
@@ -118,8 +118,8 @@ def test_dream4():
 
     sp_gies_network = pd.read_csv("./insilico_size10_{}/sp-gies-adj_mat.csv", header=0).to_numpy()
     gies_network =  pd.read_csv("./insilico_size10_{}/gies-adj_mat.csv", header=0).to_numpy()
-    gies_o_network =  pd.read_csv("./insilico_size10_{}/gies-o-adj_mat.csv", header=0).to_numpy()
-    pc_network = pd.read_csv("./insilico_size10_{}/cupc_adj_mat.csv", header=0).to_numpy()
+    gies_o_network =  pd.read_csv("./insilico_size10_{}/obs_gies-adj_mat.csv", header=0).to_numpy()
+    pc_network = pd.read_csv("./insilico_size10_{}/obs_cupc_adj_mat.csv", header=0).to_numpy()
 
     pc_network = pc_network[inds][:,inds]
     pc_graph = adj_to_dag(pc_network, nodes)
@@ -153,8 +153,8 @@ def test_random():
 
             sp_gies_network = pd.read_csv("./random_test_set_10_{}/sp-gies-adj_mat.csv", header=0).to_numpy()
             gies_network =  pd.read_csv("./random_test_set_10_{}/gies-adj_mat.csv", header=0).to_numpy()
-            gies_o_network =  pd.read_csv("./random_test_set_10_{}/gies-o-adj_mat.csv", header=0).to_numpy()
-            pc_network = pd.read_csv("./random_test_set_10_{}/cupc_adj_mat.csv", header=0).to_numpy()
+            gies_o_network =  pd.read_csv("./random_test_set_10_{}/obs_gies-adj_mat.csv", header=0).to_numpy()
+            pc_network = pd.read_csv("./random_test_set_10_{}/obs_cupc_adj_mat.csv", header=0).to_numpy()
             sp_gies.append(sp_gies_network)
             ground_truth.append(true_graph)
 

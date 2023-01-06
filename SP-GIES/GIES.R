@@ -1,11 +1,13 @@
 library(pcalg)
 library(tictoc)
-# # Example read data
-dataset_path <- file.path("../regulondb2/data_smaller.csv", fsep=.Platform$file.sep)
-target_path <- file.path("../regulondb2/targets.csv", fsep=.Platform$file.sep)
-target_index_path <- file.path("../regulondb2/target_index.csv", fsep=.Platform$file.sep)
 
+## This file contains functions for calling the GIES algorithm in the pcalg library
 
+# Given file paths for the dataset, targets and target indices, run GIES
+# The dataset file should contain a matrix of values with each row corresponding to samples and each column corresponding to a random variable in the network.
+# The targets file should contain a list of possible interventions to obtain the samples in the dataset.
+# The targets index file should contain a list of size # of samples. Each value corresponds to the index of the target list
+# See pcalg::gies documentation for more (https://rdrr.io/cran/pcalg/man/gies.html)
 run_from_file_gies <- function(dataset_path, target_path, target_index_path, save_path) {
     dataset <- read.table(dataset_path, sep=",", header=FALSE)
     print(dim(dataset))
@@ -22,6 +24,9 @@ run_from_file_gies <- function(dataset_path, target_path, target_index_path, sav
     gies(dataset, targets, targets.index, save_path)
 }
 
+# Given dataset (matrix of size # samples x # nodes), targets (list),  targets.index (list of size #samples)
+# run the GIES algorithm and save the adjacency matrix in the save_path
+# Also prints the time to solution
 gies <- function(dataset, targets, targets.index, save_path){
     tic()
     score <- new("GaussL0penIntScore", data = dataset, targets=targets, target.index=targets.index)
@@ -30,5 +35,10 @@ gies <- function(dataset, targets, targets.index, save_path){
     toc()
     write.csv(result$repr$weight.mat() ,row.names = FALSE, file = paste(save_path, 'gies-adj_mat.csv',sep = ''))
 }
+
+# # Example read data
+dataset_path <- file.path("../regulondb/data_smaller.csv", fsep=.Platform$file.sep)
+target_path <- file.path("../regulondb/targets.csv", fsep=.Platform$file.sep)
+target_index_path <- file.path("../regulondb/target_index.csv", fsep=.Platform$file.sep)
 
 #run_from_file_gies(dataset_path, target_path, target_index_path)

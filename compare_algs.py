@@ -15,6 +15,11 @@ font = {'family' : 'normal',
 import matplotlib
 matplotlib.rc('font', **font)
 
+# Script to compare PC, GIES-O (observational only), GIES-IO (observational + interventional joint), and SP-GIES-IO algorhtms
+# on random, dream4 and regulondb datasets
+
+
+# Helper function to convert an adjacency matrix into a Networkx Digraph
 def adj_to_dag(adj, all_nodes,fixed_edges=None):
     dag = nx.DiGraph()
     dag.add_nodes_from(all_nodes)
@@ -26,6 +31,7 @@ def adj_to_dag(adj, all_nodes,fixed_edges=None):
         dag.add_edges_from(fixed_edges)
     return dag
 
+# Helper function to convert a list of edges into an adjacency matrix
 def edge_to_adj(edges, all_nodes):
     adj_mat = np.zeros((len(all_nodes), len(all_nodes)))
     for e in edges:
@@ -34,11 +40,14 @@ def edge_to_adj(edges, all_nodes):
         adj_mat[start,end] = 1
     return adj_mat
 
+# Helper function to convert a list of edges into a Networkx Digraph
 def edge_to_dag(edges):
     dag = nx.DiGraph()
     dag.add_edges_from(edges)
     return dag
 
+# Helper function to print the SHD, SID, AUC for a set of algorithms and networks
+# Also handles averaging over several sets of networks (e.g the random comparison averages over 30 different generated graphs)
 def get_scores(alg_names, networks, ground_truth):
     for name, net in zip(alg_names, networks):
         if type(net) == list and type(ground_truth) == list:
@@ -66,6 +75,7 @@ def get_scores(alg_names, networks, ground_truth):
             print("{} {} {} {}".format(name, shd, sid, auc))
 
 
+# Evaluate the performance of algorithms on the regulondb dataset
 def test_regulondb():
     print("REGULONDB")
     true_adj = pd.read_csv("./regulondb/ground_truth.csv", header=None).values
@@ -105,6 +115,7 @@ def test_regulondb():
                [aracne_graph, clr_graph, sp_gies_graph,
                 np.zeros((len(genes), len(genes)))], true_graph)
 
+# Evaluate the performance of algorithms on the Dream4 size 10 network 3 dataset
 def test_dream4():
     print("DREAM4")
     d=3
@@ -131,7 +142,8 @@ def test_dream4():
     get_scores(["PC-O", "GIES-O", "GIES-OI","SP-GIES-OI", "EMPTY"],
                [pc_graph, gies_o_graph, gies_graph, sp_gies_graph, np.zeros((len(nodes), len(nodes)))], true_graph)
 
-
+# Evaluate the performance of algorithms on the random datasets of size 10 nodes(Erdos Renyi, scale-free, and small-world)
+# Average over 30 generated graphs for each network type
 def test_random():
     num_nodes = 10
     random = [ "ER", "scale", "small"]

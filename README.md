@@ -19,7 +19,7 @@ Rscript install.R
 
 ### Data
 The repo contains three types of data: (1) Gaussian random data from Erdos Renyi, small-world and scale-free random networks.
-(2) DREAM4 insilico network challenge (network #3) (3) RegulonDB gene regulatory network dataset
+(2) DREAM4 insilico network challenge (https://www.synapse.org/#!Synapse:syn3049712/wiki/74628) (3) RegulonDB gene regulatory network dataset (http://regulondb.ccg.unam.mx/)
 
 To create random data, use the script ```create_random_data.py```. For examples of usage, check ```gen_scaling_data.sh```
 To create DREAM4 insilico data in the correct format run the following to create the correct csv files:

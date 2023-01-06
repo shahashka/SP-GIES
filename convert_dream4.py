@@ -2,11 +2,15 @@ import pandas as pd
 import argparse
 import numpy as np
 
+# Script to convert the DREAM4 challenge data into a format that can be used by joint structure learners
+
+# Choose the directories for where the original .tsv data is located
 def get_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('-d', '--directories', nargs='+', default=[])
     return parser.parse_args()
 
+# Creates .txt versions of the data used for the ARACNE-AP and CLR algorithms
 def create_text_files(dir,df,filename):
     genes = df.columns
     data = df.to_numpy().T
@@ -20,6 +24,9 @@ def create_text_files(dir,df,filename):
         for line in np.arange(data.shape[0]):
             f.write('\t'.join([genes[line]]+ ["{:.2f}".format(a) for a in data[line]]) + '\n')
 
+# Creates *goldstandard.csv, *obs.csv, and *combine.csv files which hold the ground truth network, observational dataset
+# and combined observational and interventional dataset respectively
+# Also performs standard normalization
 def convert_to_csv(dir):
     df_network = pd.read_csv("{}/{}_goldstandard.tsv".format(dir,dir), sep='\t', names=['start','end', 'edge'],header=0)
     df_network.to_csv("{}/{}_goldstandard.csv".format(dir,dir), index=False)

@@ -1,13 +1,13 @@
 library(pcalg)
-library(graph)
-library(MASS)
 library(tictoc)
-library(igraph)
 
 source("../cupc/cuPC.R")
 source("GIES.R")
 source("SP-GIES.R")
 
+## Scaling study used in paper. Runs small-world random network dataset of size 10,100,1000,2000 nodes.
+## Compares GIES and SP-GIES. SP-GIES achieves ~4x speedup
+## First run gen_scaling_data.sh script to generate all data needed for this study
 
 run_sp_gies <- function(num_nodes) {
     # # read data
@@ -38,7 +38,7 @@ run_gies <- function(num_nodes) {
 }
 
 
-graph_nodes <- list(10,100,1000)
+graph_nodes <- list(10,100,1000,2000)
 num_repeats = 3
 for (n in 1:num_repeats) {
     for (i in graph_nodes) {

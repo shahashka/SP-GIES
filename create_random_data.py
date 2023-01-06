@@ -7,6 +7,8 @@ import causaldag as cd
 import os
 from sklearn.preprocessing import normalize
 
+# Script to generate random data from a random network either Erdos Renyi, scale-free or small world
+# Specify the number of samples, number of nodes and number of graphs needed
 def get_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('--random_graph', type=str)

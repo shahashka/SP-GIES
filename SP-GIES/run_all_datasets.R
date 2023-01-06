@@ -2,6 +2,10 @@ source("../cupc/cuPC.R")
 source("../SP-GIES/GIES.R")
 source("../SP-GIES/SP-GIES.R")
 
+## File to run GIES, SP-GIES on all three datasets and save adjacency matrices in each folder.
+## Handles unique file formats of each dataset
+
+
 # Run RegulonDB
 #dataset_path <- file.path("../regulondb/data_smaller.csv", fsep=.Platform$file.sep)
 #target_path <- file.path("../regulondb/targets.csv", fsep=.Platform$file.sep)

@@ -2,11 +2,11 @@ library(pcalg)
 library(tictoc)
 source("../cupc/cuPC.R")
 
-# # Example read data
-dataset_path <- file.path("../regulondb2/data_smaller.csv", fsep=.Platform$file.sep)
-target_path <- file.path("../regulondb2/targets.csv", fsep=.Platform$file.sep)
-target_index_path <- file.path("../regulondb2/target_index.csv", fsep=.Platform$file.sep)
+## This file contains functions for calling the SP-GIES algorithm which is a two-part algorithm that first calls
+## cupc to estimate a skeleton using the PC algorithm. Then runs GIES from the pcalg algorithm to estimate the final
+## graph given observational and interventional data
 
+# Given file paths for the dataset, targets and target indices, run SP-GIES
 run_from_file_sp_gies <- function(dataset_path, target_path, target_index_path, save_path, save_pc=FALSE) {
     dataset <- read.table(dataset_path, sep=",", header=FALSE)
     targets <- read.table(target_path, sep=",", header=FALSE)
@@ -22,6 +22,10 @@ run_from_file_sp_gies <- function(dataset_path, target_path, target_index_path, 
     sp_gies(dataset, targets, targets.index, save_path, save_pc)
 }
 
+# Given dataset (matrix of size # samples x # nodes), targets (list),  targets.index (list of size #samples) run the SP-GIES algorithm
+# and save the adjacency matrix in the save_path. Also saves the adjacency matrix of the skeleton (output of the cupc algorithm)
+# if save_pc is set to TRUE
+# Also prints the time to solution which includes calculating the sufficient statistics for the PC algorithm
 sp_gies <- function(dataset, targets, targets.index, save_path, save_pc=FALSE) {
     tic()
     corrolationMatrix <- cor(dataset)

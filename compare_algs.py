@@ -67,6 +67,7 @@ def get_scores(alg_names, networks, ground_truth):
 
 
 def test_regulondb():
+    print("REGULONDB")
     true_adj = pd.read_csv("./regulondb/ground_truth.csv", header=None).values
     genes = [i[0] for i in pd.read_csv("./regulondb/genes.txt", header=None).values]
     true_graph = adj_to_dag(true_adj, all_nodes=genes)
@@ -74,9 +75,9 @@ def test_regulondb():
     aracne_network = pd.read_csv("./regulondb/network.txt", sep='\t',header=0)
     clr_network = pd.read_csv("./regulondb/adj_mat.csv", header=None).to_numpy()
     sp_gies_network = pd.read_csv("./regulondb/sp-gies-adj_mat.csv", header=0).to_numpy()
-    gies_network =  pd.read_csv("./regulondb/gies-adj_mat.csv", header=0).to_numpy()
+    #gies_network =  pd.read_csv("./regulondb/gies-adj_mat.csv", header=0).to_numpy()
     # gies_o_network =  pd.read_csv("./regulondb/gies-o-adj_mat.csv", header=0).to_numpy()
-    pc_network = pd.read_csv("./regulondb/cupc_adj_mat.csv", header=0).to_numpy()
+    #pc_network = pd.read_csv("./regulondb/cupc_adj_mat.csv", header=0).to_numpy()
 
     inds = pd.read_csv("./regulondb/inds.csv", header=None, sep=",").iloc[0].values
 
@@ -94,10 +95,10 @@ def test_regulondb():
     clr_network[clr_network < threshold] = 0
     clr_graph = adj_to_dag(clr_network,genes)
 
-    pc_network = pc_network[inds][:,inds]
-    pc_graph = adj_to_dag(pc_network, genes)
+    #pc_network = pc_network[inds][:,inds]
+    #pc_graph = adj_to_dag(pc_network, genes)
     sp_gies_graph = adj_to_dag(sp_gies_network, genes)
-    gies_graph = adj_to_dag(gies_network, genes)
+    #gies_graph = adj_to_dag(gies_network, genes)
     # gies_o_graph = adj_to_dag(gies_o_network, genes)
 
     get_scores(["ARACNE-AP", "CLR",  "SP-GIES-OI", "EMPTY"],
@@ -105,6 +106,7 @@ def test_regulondb():
                 np.zeros((len(genes), len(genes)))], true_graph)
 
 def test_dream4():
+    print("DREAM4")
     d=3
     print("NETWORK {}".format(d))
     edges = pd.read_csv("./insilico_size10_{}/insilico_size10_{}_goldstandard.csv".format(d, d), header=0)
@@ -116,19 +118,18 @@ def test_dream4():
     nodes.remove('target')
     true_graph.add_nodes_from(nodes)
 
-    sp_gies_network = pd.read_csv("./insilico_size10_{}/sp-gies-adj_mat.csv", header=0).to_numpy()
-    gies_network =  pd.read_csv("./insilico_size10_{}/gies-adj_mat.csv", header=0).to_numpy()
-    gies_o_network =  pd.read_csv("./insilico_size10_{}/obs_gies-adj_mat.csv", header=0).to_numpy()
-    pc_network = pd.read_csv("./insilico_size10_{}/obs_cupc_adj_mat.csv", header=0).to_numpy()
+    sp_gies_network = pd.read_csv("./insilico_size10_{}/sp-gies-adj_mat.csv".format(d), header=0).to_numpy()
+    gies_network =  pd.read_csv("./insilico_size10_{}/gies-adj_mat.csv".format(d), header=0).to_numpy()
+    gies_o_network =  pd.read_csv("./insilico_size10_{}/obs_gies-adj_mat.csv".format(d), header=0).to_numpy()
+    pc_network = pd.read_csv("./insilico_size10_{}/obs_cupc-adj_mat.csv".format(d), header=0).to_numpy()
 
-    pc_network = pc_network[inds][:,inds]
     pc_graph = adj_to_dag(pc_network, nodes)
     sp_gies_graph = adj_to_dag(sp_gies_network, nodes)
     gies_graph = adj_to_dag(gies_network, nodes)
     gies_o_graph = adj_to_dag(gies_o_network, nodes)
 
-    get_scores(["SP-GIES-OI", "EMPTY"],
-               [sp_gies_graph, np.zeros((len(nodes), len(nodes)))], true_graph)
+    get_scores(["PC-O", "GIES-O", "GIES-OI","SP-GIES-OI", "EMPTY"],
+               [pc_graph, gies_o_graph, gies_graph, sp_gies_graph, np.zeros((len(nodes), len(nodes)))], true_graph)
 
 
 def test_random():
@@ -136,6 +137,7 @@ def test_random():
     random = [ "ER", "scale", "small"]
     num_graphs = 30
     for r in random:
+        print("RANDOM {}".format(r))
         sp_gies = []
         pc = []
         gies = []
@@ -151,17 +153,20 @@ def test_random():
             nodes.remove('target')
             true_graph.add_nodes_from(nodes)
 
-            sp_gies_network = pd.read_csv("./random_test_set_10_{}/sp-gies-adj_mat.csv", header=0).to_numpy()
-            gies_network =  pd.read_csv("./random_test_set_10_{}/gies-adj_mat.csv", header=0).to_numpy()
-            gies_o_network =  pd.read_csv("./random_test_set_10_{}/obs_gies-adj_mat.csv", header=0).to_numpy()
-            pc_network = pd.read_csv("./random_test_set_10_{}/obs_cupc_adj_mat.csv", header=0).to_numpy()
+            sp_gies_network = pd.read_csv("./random_test_set_{}_{}/sp-gies-adj_mat.csv".format(num_nodes,r,n), header=0).to_numpy()
+            gies_network =  pd.read_csv("./random_test_set_{}_{}/gies-adj_mat.csv".format(num_nodes,r,n), header=0).to_numpy()
+            gies_o_network =  pd.read_csv("./random_test_set_{}_{}/obs_gies-adj_mat.csv".format(num_nodes, r, n), header=0).to_numpy()
+            pc_network = pd.read_csv("./random_test_set_{}_{}/obs_cupc-adj_mat.csv".format(num_nodes, r, n), header=0).to_numpy()
             sp_gies.append(sp_gies_network)
+            pc.append(pc_network)
+            gies.append(gies_network)
+            gies_o.append(gies_o_network)
             ground_truth.append(true_graph)
 
-        get_scores(["SP-GIES-OI", "EMPTY"],
-                   [sp_gies, np.zeros((num_nodes, num_nodes))], ground_truth)
+        get_scores(["PC-O", "GIES-O", "GIES-OI", "SP-GIES-OI", "EMPTY"],
+                   [pc, gies_o, gies, sp_gies, np.zeros((num_nodes, num_nodes))], ground_truth)
 
 
-test_regulondb()
-test_random()
+#test_regulondb()
+#test_random()
 test_dream4()

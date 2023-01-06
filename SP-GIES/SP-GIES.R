@@ -27,9 +27,9 @@ sp_gies <- function(dataset, targets, targets.index, save_path, save_pc=FALSE) {
     corrolationMatrix <- cor(dataset)
     p <- ncol(dataset)
     suffStat <- list(C = corrolationMatrix, n = nrow(dataset))
-    cuPC_fit <- cu_pc(suffStat, p=p, alpha=0.05)
+    cuPC_fit <- cu_pc(suffStat, p=p, alpha=0.01)
     if (save_pc) {
-        write.csv(as(cuPC_fit@graph, "matrix") ,row.names = FALSE, file = paste(save_path, 'cupc-adj_mat.csv',sep = '');
+        write.csv(as(cuPC_fit@graph, "matrix") ,row.names = FALSE, file = paste(save_path, 'cupc-adj_mat.csv',sep = ''))
     }
 
     fixedGaps <- as(cuPC_fit@graph,"matrix")
@@ -42,6 +42,6 @@ sp_gies <- function(dataset, targets, targets.index, save_path, save_pc=FALSE) {
     print("The total time consumed by SP-GIES is:")
     toc()
 
-    write.csv(result$repr$weight.mat() ,row.names = FALSE, file = paste(save_path, 'sp-gies-adj_mat.csv',sep = '');
+    write.csv(result$repr$weight.mat() ,row.names = FALSE, file = paste(save_path, 'sp-gies-adj_mat.csv',sep = ''))
  }
 

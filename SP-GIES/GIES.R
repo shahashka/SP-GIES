@@ -28,7 +28,7 @@ gies <- function(dataset, targets, targets.index, save_path){
     result <- pcalg::gies(score, fixedGaps=NULL, targets=targets)
     print("The total time consumed by GIES is:")
     toc()
-    write.csv(result$repr$weight.mat() ,row.names = FALSE, file = paste(save_path, 'gies-adj_mat.csv',sep = '');
+    write.csv(result$repr$weight.mat() ,row.names = FALSE, file = paste(save_path, 'gies-adj_mat.csv',sep = ''))
 }
 
 #run_from_file_gies(dataset_path, target_path, target_index_path)

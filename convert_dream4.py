@@ -21,6 +21,8 @@ def create_text_files(dir,df,filename):
             f.write('\t'.join([genes[line]]+ ["{:.2f}".format(a) for a in data[line]]) + '\n')
 
 def convert_to_csv(dir):
+    df_network = pd.read_csv("{}/{}_goldstandard.tsv".format(dir,dir), sep='\t', names=['start','end', 'edge'],header=0)
+    df_network.to_csv("{}/{}_goldstandard.csv".format(dir,dir), index=False)
     df_wild = pd.read_csv("{}/{}_wildtype.tsv".format(dir,dir), sep='\t', header=0)
 
     df_time = pd.read_csv("{}/{}_timeseries.tsv".format(dir,dir), sep='\t', header=0)
@@ -30,10 +32,10 @@ def convert_to_csv(dir):
     df_obs = pd.concat([df_wild,df_mult,df_time_unperturb])
 
     # NORMALIZE
-    # mean = df_obs.mean(axis=0)
-    # stddev = df_obs.std(axis=0)
-    # df_norm = (df_obs - mean) / stddev
-    # df_obs = df_norm
+    mean = df_obs.mean(axis=0)
+    stddev = df_obs.std(axis=0)
+    df_norm = (df_obs - mean) / stddev
+    df_obs = df_norm
     create_text_files(dir,df_obs, "data_obs")
 
     df_obs['target'] = np.zeros(df_obs.shape[0])
@@ -41,12 +43,15 @@ def convert_to_csv(dir):
 
     # Normalize interventional data separately
     df_ko = pd.read_csv("{}/{}_knockouts.tsv".format(dir,dir), sep='\t', header=0)
-    # mean = df_ko.mean(axis=0)
-    # stddev = df_ko.std(axis=0)
-    # df_norm = (df_ko - mean) / stddev
-    # df_ko = df_norm
-
-    df_combine = pd.concat([df_obs, df_ko])
+    df_kd = pd.read_csv("{}/{}_knockdowns.tsv".format(dir,dir), sep='\t', header=0)
+    df_inter = pd.concat([df_ko, df_kd])
+    mean = df_inter.mean(axis=0)
+    stddev = df_inter.std(axis=0)
+    df_norm = (df_inter - mean) / stddev
+    df_inter = df_norm
+    targets = np.arange(1,df_ko.shape[0]+1)
+    df_inter['target'] = np.concatenate([targets, targets])
+    df_combine = pd.concat([df_obs, df_inter])
     df_combine.to_csv("{}/{}_combine.csv".format(dir,dir), index=False)
     create_text_files(dir,df_combine, "data_combine")
 

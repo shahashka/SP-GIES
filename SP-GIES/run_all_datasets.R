@@ -28,13 +28,13 @@ print(targets)
 print(targets.index)
 print(dim(dataset))
 
+# Use skeleton from CLR as input to sp-gies algorithm
 skeleton <- read.table("../insilico_size10_3/adj_mat.csv", sep=",", header=FALSE)
 skeleton <- as(skeleton,"matrix")
 skeleton <- as.data.frame(skeleton)
 skeleton <- skeleton == 0
 class(skeleton) <- "logical"
 sp_gies_from_skeleton(dataset, targets, targets.index, skeleton, save_path="../insilico_size10_3/")
-#sp_gies(dataset, targets, targets.index, save_path="../insilico_size10_3/")
 gies(dataset, targets, targets.index, save_path="../insilico_size10_3/")
 
 dataset_O_path <- file.path(paste("../insilico_size10_3/insilico_size10_3_obs.csv", sep=""), fsep=.Platform$file.sep)

@@ -7,6 +7,7 @@ source("../cupc/cuPC.R")
 ## graph given observational and interventional data
 
 # Given file paths for the dataset, targets and target indices, run SP-GIES
+# Optionally provide a path to a pre-generated skeleton
 run_from_file_sp_gies <- function(dataset_path, target_path, target_index_path, save_path, skeleton_path=FALSE, save_pc=FALSE) {
     dataset <- read.table(dataset_path, sep=",", header=FALSE)
     targets <- read.table(target_path, sep=",", header=FALSE)
@@ -62,9 +63,11 @@ sp_gies <- function(dataset, targets, targets.index, save_path, save_pc=FALSE) {
     write.csv(result$repr$weight.mat() ,row.names = FALSE, file = paste(save_path, 'sp-gies-adj_mat.csv',sep = ''))
  }
 
- sp_gies_from_skeleton <- function(dataset, targets, targets.index, skeleton, save_path, save_pc=FALSE) {
+# Same method as above, except skeleton comes from another algorithm. fixedGaps is a logical array that
+# is  FALSE for all edges in the skeleton and TRUE otherwise
+ sp_gies_from_skeleton <- function(dataset, targets, targets.index, fixedGaps, save_path, save_pc=FALSE) {
     score <- new("GaussL0penIntScore", data = dataset, targets=targets, target.index=targets.index)
-    result <- pcalg::gies(score, fixedGaps=skeleton, targets=targets)
+    result <- pcalg::gies(score, fixedGaps=fixedGaps, targets=targets)
     print("The total time consumed by SP-GIES is:")
     toc()
     write.csv(result$repr$weight.mat() ,row.names = FALSE, file = paste(save_path, 'sp-gies-adj_mat.csv',sep = ''))

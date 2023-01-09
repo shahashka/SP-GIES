@@ -7,7 +7,7 @@ import itertools
 import warnings
 import time
 import cdt
-from cdt.causality.graph import GIES
+from cdt.causality.graph import GIES, PC
 warnings.filterwarnings("ignore")
 font = {'family' : 'normal',
         'weight' : 'bold',
@@ -17,7 +17,6 @@ matplotlib.rc('font', **font)
 
 # Script to compare PC, GIES-O (observational only), GIES-IO (observational + interventional joint), and SP-GIES-IO algorhtms
 # on random, dream4 and regulondb datasets
-
 
 # Helper function to convert an adjacency matrix into a Networkx Digraph
 def adj_to_dag(adj, all_nodes,fixed_edges=None):
@@ -146,7 +145,7 @@ def test_dream4():
 # Average over 30 generated graphs for each network type
 def test_random():
     num_nodes = 10
-    random = [ "ER", "scale", "small"]
+    random = [ "ER","scale","small"]
     num_graphs = 30
     for r in random:
         print("RANDOM {}".format(r))
@@ -156,29 +155,36 @@ def test_random():
         gies_o = []
         ground_truth = []
         for n in range(num_graphs):
-            edges = pd.read_csv( "./random_test_set_{}_{}/bn_network_{}.csv".format(num_nodes, r, n), header=0)
-            df = pd.read_csv("./random_test_set_{}_{}/data_{}.csv".format(num_nodes, r,n), header=0)
+            edges = pd.read_csv( "./random_test_set_{}_{}/bn_network_{}.csv".format(num_nodes,r, n), header=0)
+            df = pd.read_csv("./random_test_set_{}_{}/data_{}.csv".format(num_nodes,r,n), header=0)
 
             edges_pos = [(r['start'], r['end']) for i, r in edges.iterrows() if r['edge'] == 1]
             true_graph = edge_to_dag(edges_pos)
             nodes = list(df.columns)
             nodes.remove('target')
             true_graph.add_nodes_from(nodes)
+            df = df.drop('target', axis=1)
 
-            sp_gies_network = pd.read_csv("./random_test_set_{}_{}/sp-gies-adj_mat.csv".format(num_nodes,r,n), header=0).to_numpy()
-            gies_network =  pd.read_csv("./random_test_set_{}_{}/gies-adj_mat.csv".format(num_nodes,r,n), header=0).to_numpy()
-            gies_o_network =  pd.read_csv("./random_test_set_{}_{}/obs_gies-adj_mat.csv".format(num_nodes, r, n), header=0).to_numpy()
-            pc_network = pd.read_csv("./random_test_set_{}_{}/obs_cupc-adj_mat.csv".format(num_nodes, r, n), header=0).to_numpy()
-            sp_gies.append(sp_gies_network)
-            pc.append(pc_network)
-            gies.append(gies_network)
-            gies_o.append(gies_o_network)
+
+            sp_gies_network = pd.read_csv("./random_test_set_{}_{}/{}_sp-gies-adj_mat.csv".format(num_nodes,r,n), header=0).to_numpy()
+            gies_network =  pd.read_csv("./random_test_set_{}_{}/{}_gies-adj_mat.csv".format(num_nodes,r,n), header=0).to_numpy()
+            gies_o_network = pd.read_csv("./random_test_set_{}_{}/obs_{}_gies-adj_mat.csv".format(num_nodes,r, n), header=0).to_numpy()
+            pc_network = pd.read_csv("./random_test_set_{}_{}/obs_{}_cupc-adj_mat.csv".format(num_nodes,r, n), header=0).to_numpy()
+            sp_gies_graph = adj_to_dag(sp_gies_network, nodes)
+            gies_graph = adj_to_dag(gies_network, nodes)
+            pc_graph = adj_to_dag(pc_network, nodes)
+            gies_o_graph = adj_to_dag(gies_o_network, nodes)
+
+            pc.append(pc_graph)
+            gies.append(gies_graph)
+            sp_gies.append(sp_gies_graph)
+            gies_o.append(gies_o_graph)
             ground_truth.append(true_graph)
 
-        get_scores(["PC-O", "GIES-O", "GIES-OI", "SP-GIES-OI", "EMPTY"],
+        get_scores(["PC-O", "GIES-O", "GIES-IO", "SP-GIES-IO","EMPTY"],
                    [pc, gies_o, gies, sp_gies, np.zeros((num_nodes, num_nodes))], ground_truth)
 
 
-#test_regulondb()
-#test_random()
+test_regulondb()
+test_random()
 test_dream4()

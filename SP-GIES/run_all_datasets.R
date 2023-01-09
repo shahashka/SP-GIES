@@ -52,10 +52,11 @@ gies(dataset, targets, targets.index, save_path="../insilico_size10_3/obs_")
 # Run random networks small world size 10
 num_nodes=10
 num_graphs=30
-for (network in list('ER', 'scale', 'small')) {
+for (network in list('ER','scale','small')) {
     for (x in 0:29) {
     	print(x)
-        dataset_OI_path <- file.path(paste("../random_test_set_",as.character(num_nodes), "_", network, "/data_joint_", x,".csv", sep=""), fsep=.Platform$file.sep)
+        folder <- paste("../random_test_set_",num_nodes, "_", network, "/",sep="")
+	dataset_OI_path <- paste(folder,"data_joint_", x,".csv", sep="")
         dataset <- read.table(dataset_OI_path, sep=",", header=TRUE)
         targets.index <- dataset[,ncol(dataset)]
         targets <- as.matrix(unique(targets.index))
@@ -64,10 +65,10 @@ for (network in list('ER', 'scale', 'small')) {
         targets <- append(targets_init, targets)
         dataset <- dataset[,1:ncol(dataset)-1]
         targets.index <- targets.index + 1
-        sp_gies(dataset, targets, targets.index, save_path=paste("../random_test_set_",as.character(num_nodes),"_", network,"/", sep=""))
-        gies(dataset, targets, targets.index, save_path=paste("../random_test_set_",as.character(num_nodes),"_", network,"/", sep=""))
+        sp_gies(dataset, targets, targets.index, save_path=paste(folder, x, "_", sep=""))
+        gies(dataset, targets, targets.index, save_path=paste(folder, x, "_", sep=""))
 
-        dataset_O_path <- file.path(paste("../random_test_set_",as.character(num_nodes), "_", network, "/data_", x,".csv", sep=""), fsep=.Platform$file.sep)
+        dataset_O_path <- paste(folder, "data_", x, ".csv", sep="")
         dataset <- read.table(dataset_O_path, sep=",", header=TRUE)
         targets.index <- dataset[,ncol(dataset)]
         targets <- as.matrix(unique(targets.index))
@@ -76,7 +77,7 @@ for (network in list('ER', 'scale', 'small')) {
         targets <- append(targets_init, targets)
         dataset <- dataset[,1:ncol(dataset)-1]
         targets.index <- targets.index + 1
-	sp_gies(dataset, targets, targets.index, save_path=paste("../random_test_set_",as.character(num_nodes),"_", network, "/obs_", sep=""), save_pc=TRUE)
-        gies(dataset, targets, targets.index, save_path=paste("../random_test_set_",as.character(num_nodes),"_", network, "/obs_", sep=""))
+	sp_gies(dataset, targets, targets.index, save_path=paste(folder, "/obs_", x, "_",sep=""), save_pc=TRUE)
+        gies(dataset, targets, targets.index, save_path=paste(folder, "/obs_", x, "_",sep=""))
     }
 }

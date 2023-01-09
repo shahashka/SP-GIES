@@ -19,11 +19,11 @@ def get_args():
     parser.add_argument('--seed', type=int)
     parser.add_argument('--working_dir', type=str)
     parser.add_argument('--num_graphs',type=int)
-
+    parser.add_argument('--normalize', action='store_true',default=False )
     return parser.parse_args()
 
 # Create a random gaussian DAG and correposning observational dataset. Assume no prior information
-def get_random_graph_data(working_dir, graph_type, nsamples, n, parameters, seed=None, num_graphs=1):
+def get_random_graph_data(working_dir, graph_type, nsamples, n, parameters, toNormalize=False, seed=None, num_graphs=1):
     if graph_type == 'erdos_renyi':
         random_graph_model = lambda nnodes: nx.erdos_renyi_graph(nnodes, p=parameters["p"], seed=seed)
     elif graph_type == 'scale_free':
@@ -41,7 +41,9 @@ def get_random_graph_data(working_dir, graph_type, nsamples, n, parameters, seed
 
         bn = GaussDAG(nodes= nodes_inds, arcs=dag.arcs, biases=bias,variances=var)
         data = bn.sample(nsamples)
-        #data = normalize(data, axis=1)
+        if toNormalize:
+            print("normalizing data")
+            data = normalize(data, axis=1)
 
         nodes = ["G{}".format(d+1) for d in nodes_inds]
         arcs = [("G{}".format(i+1),"G{}".format(j+1))  for i,j in dag.arcs]
@@ -75,4 +77,4 @@ def get_random_graph_data(working_dir, graph_type, nsamples, n, parameters, seed
 
 args = get_args()
 get_random_graph_data(args.working_dir, args.random_graph, nsamples=args.nsamples, n=args.nnodes,
-                      parameters={"p":args.p, "k":args.k}, seed=args.seed, num_graphs=args.num_graphs)
+                      parameters={"p":args.p, "k":args.k}, toNormalize=args.normalize, seed=args.seed, num_graphs=args.num_graphs)

@@ -1,5 +1,8 @@
 # SP-GIES
-Skeleton-Primed GIES algorithm
+Skeleton-Primed GIES algorithm. A simple two step structure learning algorithm for estimating the causal graph between
+random variables in a system. Step (1) uses observational structure learners: PC, ARACNE-AP or 
+CLR to estimate the skeleton. Step (2) uses GIES with the skeleton as input to restrict the edge set of the optimization. 
+This achieves up to 4x speedup compared to GIES. 
 
 ### Setup
 Create conda environment using:

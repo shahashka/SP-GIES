@@ -90,7 +90,7 @@ def run_random():
 
             est_dag, _ = unknown_target_igsp(setting_list, nodes, ci_tester, invariance_tester)
             est_adj = edge_to_adj(est_dag.arcs, list(est_dag.nodes))
-            np.savetxt("./insilico_size10_3/igsp_adj.csv", est_adj, delimeter=",")
+            np.savetxt("./random_test_set_10_{}/igsp_{}_adj.csv".format(network,i), est_adj, delimeter=",")
 
 run_regulon_db()
 run_dream4()

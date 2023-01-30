@@ -33,6 +33,8 @@ def get_random_graph_data(working_dir, graph_type, nsamples, n, parameters, toNo
     else:
         print("Unsupported random graph")
         return
+    nx.draw(random_graph_model)
+    plt.savefig("{}/fig.png".format(working_dir))
     for g in range(num_graphs):
         dag = rand.directed_random_graph(n, random_graph_model)
         nodes_inds = list(dag.nodes)

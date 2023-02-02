@@ -34,7 +34,13 @@ run_gies <- function(num_nodes) {
     targets_init <- list(integer(0))
     targets <- append(targets_init, targets)
     dataset <- dataset[,1:ncol(dataset)-1]
-    gies(dataset, targets, targets.index, save_path="./")
+    if (num_nodes >=1000) {
+        max_degree = num_nodes/10
+    }
+    else {
+        max_degree=integer(0)
+    }
+    gies(dataset, targets, targets.index, save_path="./", max_degree=max_degree)
 }
 
 

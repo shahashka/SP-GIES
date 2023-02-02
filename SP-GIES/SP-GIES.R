@@ -43,6 +43,8 @@ sp_gies <- function(dataset, targets, targets.index, save_path, save_pc=FALSE) {
     p <- ncol(dataset)
     suffStat <- list(C = corrolationMatrix, n = nrow(dataset))
     cuPC_fit <- cu_pc(suffStat, p=p, alpha=0.01)
+    print("The total time consumed by cuPC is:")
+    toc()
 
     # TODO we don't want this included in time to solution
     if (save_pc) {

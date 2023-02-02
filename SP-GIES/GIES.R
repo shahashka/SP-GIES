@@ -27,10 +27,10 @@ run_from_file_gies <- function(dataset_path, target_path, target_index_path, sav
 # Given dataset (matrix of size # samples x # nodes), targets (list),  targets.index (list of size #samples)
 # run the GIES algorithm and save the adjacency matrix in the save_path
 # Also prints the time to solution
-gies <- function(dataset, targets, targets.index, save_path){
+gies <- function(dataset, targets, targets.index, save_path, max_degree=integer(0)){
     tic()
     score <- new("GaussL0penIntScore", data = dataset, targets=targets, target.index=targets.index)
-    result <- pcalg::gies(score, fixedGaps=NULL, targets=targets)
+    result <- pcalg::gies(score, fixedGaps=NULL, targets=targets, maxDegree=max_degree)
     print("The total time consumed by GIES is:")
     toc()
     write.csv(result$repr$weight.mat() ,row.names = FALSE, file = paste(save_path, 'gies-adj_mat.csv',sep = ''))

@@ -37,8 +37,9 @@ run_from_file_sp_gies <- function(dataset_path, target_path, target_index_path, 
 # and save the adjacency matrix in the save_path. Also saves the adjacency matrix of the skeleton (output of the cupc algorithm)
 # if save_pc is set to TRUE
 # Also prints the time to solution which includes calculating the sufficient statistics for the PC algorithm
-sp_gies <- function(dataset, targets, targets.index, save_path, save_pc=FALSE) {
-    tic()
+sp_gies <- function(dataset, targets, targets.index, save_path, save_pc=FALSE, max_degree=integer(0)) {
+    tic("cupc")
+    tic("gies")
     corrolationMatrix <- cor(dataset)
     p <- ncol(dataset)
     suffStat <- list(C = corrolationMatrix, n = nrow(dataset))
@@ -58,7 +59,7 @@ sp_gies <- function(dataset, targets, targets.index, save_path, save_pc=FALSE) {
     class(fixedGaps) <- "logical"
 
     score <- new("GaussL0penIntScore", data = dataset, targets=targets, target.index=targets.index)
-    result <- pcalg::gies(score, fixedGaps=fixedGaps, targets=targets)
+    result <- pcalg::gies(score, fixedGaps=fixedGaps, targets=targets, maxDegree=max_degree)
     print("The total time consumed by SP-GIES is:")
     toc()
 

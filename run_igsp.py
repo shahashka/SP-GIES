@@ -3,6 +3,15 @@ import conditional_independence
 import pandas as pd
 import numpy as np
 
+# Helper function to convert a list of edges into an adjacency matrix                            
+def edge_to_adj(edges, all_nodes):
+    adj_mat = np.zeros((len(all_nodes), len(all_nodes)))
+    for e in edges:
+        start = all_nodes.index(e[0])
+        end = all_nodes.index(e[1])
+        adj_mat[start,end] = 1
+    return adj_mat
+
 def run_regulon_db():
     data = pd.read_csv("./regulondb/data_smaller.csv", header=None)
     targets = pd.read_csv("./regulondb/targets.csv", header=None)

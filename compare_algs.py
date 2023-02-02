@@ -175,7 +175,8 @@ def test_random():
             gies_network =  pd.read_csv("./random_test_set_{}_{}/{}_gies-adj_mat.csv".format(num_nodes,r,n), header=0).to_numpy()
             gies_o_network = pd.read_csv("./random_test_set_{}_{}/obs_{}_gies-adj_mat.csv".format(num_nodes,r, n), header=0).to_numpy()
             pc_network = pd.read_csv("./random_test_set_{}_{}/obs_{}_cupc-adj_mat.csv".format(num_nodes,r, n), header=0).to_numpy()
-            igsp_network = pd.read_csv("./random_test_set_{}_{}/igsp_{}_adj.csv".format(num_nodes,r, n), header=0).to_numpy()
+            igsp_network = pd.read_csv("./random_test_set_{}_{}/igsp_{}_adj.csv".format(num_nodes,r, n), header=None).to_numpy()
+        
             sp_gies_graph = adj_to_dag(sp_gies_network, nodes)
             gies_graph = adj_to_dag(gies_network, nodes)
             pc_graph = adj_to_dag(pc_network, nodes)
@@ -193,6 +194,6 @@ def test_random():
                    [pc, gies_o, gies, sp_gies, igsp, np.zeros((num_nodes, num_nodes))], ground_truth)
 
 
-test_regulondb()
+#test_regulondb()
 test_random()
 test_dream4()

@@ -43,19 +43,20 @@ run_gies <- function(num_nodes) {
 run_igsp <- function(num_nodes) {
     obs_dataset_path <- file.path(paste("../random_test_set_fewer_",as.character(num_nodes),"_small/data_0.csv", sep=""), fsep=.Platform$file.sep)
     int_dataset_path <- file.path(paste("../random_test_set_fewer_",as.character(num_nodes),"_small/interventional_data_0.csv", sep=""), fsep=.Platform$file.sep)
-    obs_data = read.table(obs_dataset_path)
+    obs_data = read.table(obs_dataset_path, sep=",", header=TRUE)
     obs_data <- obs_data[,1:ncol(obs_data)-1]
 
-    iv_data = read.table(int_dataset_path)
+    iv_data = read.table(int_dataset_path, sep=",", header=TRUE)
     iv_data <- iv_data[,1:ncol(iv_data)-1]
+
     #get data as input
     data.list = list()
     t.list = list()
     data.list[[1]] = obs_data
     i = 2
-    # Loop through interventional data rows and add to list
-    for (row in range(1:dim(iv_data)[1]) ) {
-        data.list[[i]] = iv_data[row]
+    # Loop through interventional data rows and add to lis
+    for (row in (1:dim(iv_data)[1]) ) {
+    	data.list[[i]] = t(iv_data[row])
         t.list[[i]] = row
         i = i + 1
     }
@@ -65,6 +66,11 @@ run_igsp <- function(num_nodes) {
     #suffstat <- list(data=data.list[[1]], ic.method=method)
     suffstat <- list(C=cor(data.list[[1]]), n=nrow(data.list[[1]]))
     alpha <-1e-3
+
+
+    print(data.list[[1]])
+    print(data.list[[2]])
+    
     #include observational dataset as an intervention
     intdata <- lapply(1:length(t.list), function(t) cbind(data.list[[t]], intervention_index=t) )
     inttargets <- t.list[1:length(t.list)]
@@ -73,6 +79,14 @@ run_igsp <- function(num_nodes) {
 
 graph_nodes <- list(10,100,1000,2000)
 num_repeats = 3
+
+for (n in 1:num_repeats) {
+    for (i in graph_nodes) {
+        print(paste("Number of nodes is ", i))
+        run_igsp(i)
+    }
+}
+
 for (n in 1:num_repeats) {
     for (i in graph_nodes) {
         print(paste("Number of nodes is ", i))

@@ -32,7 +32,8 @@ run_sp_gies <- function(num_nodes) {
 
 run_gies <- function(num_nodes) {
     # # read data
-    dataset_path <- file.path(paste("../random_test_set_fewer_",as.character(num_nodes),"_small/data_0.csv", sep=""), fsep=.Platform$file.sep)
+    dataset_path <- file.path(paste("../random_test_set_fewer_",as.character(num_nodes),"_small/data_joint_0.csv", sep=""), fsep=.Platform$file.sep)
+    dataset <- read.table(dataset_path, sep=",", header=TRUE)
     # load target, target index files
     targets.index <- dataset[,ncol(dataset)]
     targets <- as.matrix(unique(targets.index))
@@ -40,6 +41,7 @@ run_gies <- function(num_nodes) {
     targets_init <- list(integer(0))
     targets <- append(targets_init, targets)
     dataset <- dataset[,1:ncol(dataset)-1]
+    targets.index <- targets.index + 1
     if (num_nodes >=1000) {
         max_degree = num_nodes/10
     }
@@ -63,7 +65,6 @@ for (n in 1:num_repeats) {
     for (i in graph_nodes) {
         print(paste("Number of nodes is ", i))
         run_gies(i)
-        print("\n")
     }
 }
 

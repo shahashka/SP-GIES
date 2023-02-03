@@ -138,8 +138,8 @@ def test_dream4():
     gies_graph = adj_to_dag(gies_network, nodes)
     gies_o_graph = adj_to_dag(gies_o_network, nodes)
 
-    get_scores(["PC-O", "GIES-O", "GIES-OI","SP-GIES-OI", "EMPTY"],
-               [pc_graph, gies_o_graph, gies_graph, sp_gies_graph, np.zeros((len(nodes), len(nodes)))], true_graph)
+    get_scores(["PC-O", "GIES-O", "GIES-OI","SP-GIES-OI", "COMPLETE"],
+               [pc_graph, gies_o_graph, gies_graph, sp_gies_graph, np.ones((len(nodes), len(nodes)))], true_graph)
 
 # Evaluate the performance of algorithms on the random datasets of size 10 nodes(Erdos Renyi, scale-free, and small-world)
 # Average over 30 generated graphs for each network type
@@ -185,6 +185,6 @@ def test_random():
                    [pc, gies_o, gies, sp_gies, np.zeros((num_nodes, num_nodes))], ground_truth)
 
 
-test_regulondb()
-test_random()
+#test_regulondb()
+#test_random()
 test_dream4()

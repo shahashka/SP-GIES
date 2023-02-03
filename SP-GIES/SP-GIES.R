@@ -1,5 +1,6 @@
 library(pcalg)
 library(tictoc)
+library(igraph)
 source("../cupc/cuPC.R")
 
 ## This file contains functions for calling the SP-GIES algorithm which is a two-part algorithm that first calls
@@ -23,6 +24,8 @@ run_from_file_sp_gies <- function(dataset_path, target_path, target_index_path, 
     if (skeleton_path) {
         skeleton <- read.table(skeleton_path, sep=",", header=FALSE)
         skeleton <- as(skeleton,"matrix")
+        #make symmetric
+        skeleton[lower.tri(skeleton)] = t(skeleton)[lower.tri(skeleton)]
         skeleton <- as.data.frame(skeleton)
         skeleton <- fixedGaps == 0
         class(skeleton) <- "logical"
@@ -62,7 +65,7 @@ sp_gies <- function(dataset, targets, targets.index, save_path, save_pc=FALSE, m
     result <- pcalg::gies(score, fixedGaps=fixedGaps, targets=targets, maxDegree=max_degree)
     print("The total time consumed by SP-GIES is:")
     toc()
-
+    print(max(degree(graph_from_adjacency_matrix(result$repr$weight.mat(), weighted=TRUE))))
     write.csv(result$repr$weight.mat() ,row.names = FALSE, file = paste(save_path, 'sp-gies-adj_mat.csv',sep = ''))
  }
 

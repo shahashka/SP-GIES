@@ -167,3 +167,77 @@ sp.restart.alg <- function(suffstat, intdata, inttargets, alpha){
 	return(dag.list[[minidx]]$dag)
 }
 
+igsp <- function(obs_data, iv_data, save_path, obs_only=FALSE) {
+    #get data as input
+    data.list = list()
+    t.list = list()
+    data.list[[1]] = obs_data
+    i = 2
+    # Loop through interventional data rows and add to list
+    cols = colnames(iv_data)
+    for (row in (1:dim(iv_data)[1]) ) {
+    	d = t(iv_data[row])
+	    colnames(d) <- cols
+	    rownames(d) <- row
+    	data.list[[i]] = d
+        t.list[[i]] = row
+        i = i + 1
+    }
+    method <- "hsic.gamma"
+
+    #prepare for sufficient statistics and intervention targets
+    #suffstat <- list(data=data.list[[1]], ic.method=method)
+    suffstat <- list(C=cor(data.list[[1]]), n=nrow(data.list[[1]]))
+    alpha <-1e-3
+    if (obs_only) {
+        t.list=list(1)
+    }
+    #include observational dataset as an intervention
+    intdata <- lapply(1:length(t.list), function(t) cbind(data.list[[t]], intervention_index=t) )
+    inttargets <- t.list[1:length(t.list)]
+    grspdag <- sp.restart.alg(suffstat, intdata, inttargets, alpha)
+    write.csv(grspdag.mat() ,row.names = FALSE, file = paste(save_path, 'igsp-adj_mat.csv',sep = ''))
+}
+
+run_from_file_igsp <- function(dataset_path, target_path, target_index_path, save_path) {
+    # Read data, split into observational and interventional
+    dataset <- read.table(dataset_path, sep=",", header=FALSE)
+    print(dim(dataset))
+    targets <- read.table(target_path, sep=",", header=FALSE)
+    targets <- split(targets, 1:nrow(targets))
+    targets <- lapply(targets, function(x) x[!is.na(x)])
+
+    targets.index <- read.table(target_index_path, sep=",", header=FALSE)
+    targets.index <- unlist(targets.index)
+    obs_data_inds = targets.index[targets.index==1]
+    int_data_inds = targets.index[targets.index>1]
+
+    obs_data = dataset[obs_data_inds]
+    iv_data = dataset[int_data_inds]
+
+    data.list = list()
+    t.list = list()
+    data.list[[1]] = obs_data
+    i = 2
+    # Loop through interventional data rows and add to list
+    cols = colnames(iv_data)
+    for (target in (1:length(targets)) {
+    	rows = int_data_inds[int_data_inds==targets]
+    	rows = iv_data[rows]
+    	data.list[[i]] = rows
+        t.list[[i]] = target
+        i = i + 1
+    }
+    method <- "hsic.gamma"
+
+    #prepare for sufficient statistics and intervention targets
+    #suffstat <- list(data=data.list[[1]], ic.method=method)
+    suffstat <- list(C=cor(data.list[[1]]), n=nrow(data.list[[1]]))
+    alpha <-1e-3
+
+    #include observational dataset as an intervention
+    intdata <- lapply(1:length(t.list), function(t) cbind(data.list[[t]], intervention_index=t) )
+    inttargets <- t.list[1:length(t.list)]
+    grspdag <- sp.restart.alg(suffstat, intdata, inttargets, alpha)
+    write.csv(grspdag.mat() ,row.names = FALSE, file = paste(save_path, 'igsp-adj_mat.csv',sep = ''))
+}

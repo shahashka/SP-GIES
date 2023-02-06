@@ -135,15 +135,18 @@ def test_dream4():
     gies_o_network =  pd.read_csv("./insilico_size10_{}/obs_gies-adj_mat.csv".format(d), header=0).to_numpy()
     pc_network = pd.read_csv("./insilico_size10_{}/obs_cupc-adj_mat.csv".format(d), header=0).to_numpy()
     igsp_network = pd.read_csv("./insilico_size10_{}/igsp_adj.csv".format(d), header=0).to_numpy()
+    igsp_o_network = pd.read_csv("./insilico_size10_{}/obs_igsp_adj.csv".format(d), header=0).to_numpy()
 
     pc_graph = adj_to_dag(pc_network, nodes)
     sp_gies_graph = adj_to_dag(sp_gies_network, nodes)
     gies_graph = adj_to_dag(gies_network, nodes)
     gies_o_graph = adj_to_dag(gies_o_network, nodes)
     igsp_graph = adj_to_dag(igsp_network, nodes)
+    igsp_o_graph = adj_to_dag(igsp_o_network, nodes)
 
-    get_scores(["PC-O", "GIES-O", "GIES-OI","SP-GIES-OI", "IGSP-OI", "EMPTY"],
-               [pc_graph, gies_o_graph, gies_graph, sp_gies_graph, igsp_graph, np.zeros((len(nodes), len(nodes)))], true_graph)
+    get_scores(["PC-O", "GIES-O", "GIES-OI","SP-GIES-OI", "IGSP-O", "IGSP-OI", "EMPTY"],
+               [pc_graph, gies_o_graph, gies_graph, sp_gies_graph, igsp_o_graph,
+                igsp_graph,  np.zeros((len(nodes), len(nodes)))], true_graph)
 
 # Evaluate the performance of algorithms on the random datasets of size 10 nodes(Erdos Renyi, scale-free, and small-world)
 # Average over 30 generated graphs for each network type
@@ -158,6 +161,7 @@ def test_random():
         gies = []
         gies_o = []
         igsp = []
+        igsp_o = []
         ground_truth = []
         for n in range(num_graphs):
             edges = pd.read_csv( "./random_test_set_{}_{}/bn_network_{}.csv".format(num_nodes,r, n), header=0)
@@ -176,22 +180,25 @@ def test_random():
             gies_o_network = pd.read_csv("./random_test_set_{}_{}/obs_{}_gies-adj_mat.csv".format(num_nodes,r, n), header=0).to_numpy()
             pc_network = pd.read_csv("./random_test_set_{}_{}/obs_{}_cupc-adj_mat.csv".format(num_nodes,r, n), header=0).to_numpy()
             igsp_network = pd.read_csv("./random_test_set_{}_{}/igsp_{}_adj.csv".format(num_nodes,r, n), header=None).to_numpy()
-        
+            igsp_o_network = pd.read_csv("./random_test_set_{}_{}/obs_igsp_{}_adj.csv".format(num_nodes,r, n), header=None).to_numpy()
+
             sp_gies_graph = adj_to_dag(sp_gies_network, nodes)
             gies_graph = adj_to_dag(gies_network, nodes)
             pc_graph = adj_to_dag(pc_network, nodes)
             gies_o_graph = adj_to_dag(gies_o_network, nodes)
             igsp_graph = adj_to_dag(igsp_network, nodes)
+            igsp_o_graph = adj_to_dag(igsp_o_network, nodes)
 
             pc.append(pc_graph)
             gies.append(gies_graph)
             sp_gies.append(sp_gies_graph)
             gies_o.append(gies_o_graph)
             igsp.append(igsp_graph)
+            igsp_o.append(igsp_o_graph)
             ground_truth.append(true_graph)
 
-        get_scores(["PC-O", "GIES-O", "GIES-IO", "SP-GIES-IO", "IGSP-IO", "EMPTY"],
-                   [pc, gies_o, gies, sp_gies, igsp, np.zeros((num_nodes, num_nodes))], ground_truth)
+        get_scores(["PC-O", "GIES-O", "GIES-IO", "SP-GIES-IO", "IGSP-O", "IGSP-IO", "EMPTY"],
+                   [pc, gies_o, gies, sp_gies, igsp_o, igsp, np.zeros((num_nodes, num_nodes))], ground_truth)
 
 
 #test_regulondb()

@@ -10,7 +10,7 @@ source("IGSP.R")
 ## Compares GIES and SP-GIES. SP-GIES achieves ~4x speedup
 ## First run gen_scaling_data.sh script to generate all data needed for this study
 
-run_sp_gies <- function(num_nodes) {
+run_sp_gies <- function(num_nodes, max_degree) {
     # # read data
     dataset_path <- file.path(paste("../random_test_set_fewer_",as.character(num_nodes),"_small/data_joint_0.csv", sep=""), fsep=.Platform$file.sep)
     dataset <- read.table(dataset_path, sep=",", header=TRUE)
@@ -22,16 +22,10 @@ run_sp_gies <- function(num_nodes) {
     targets <- append(targets_init, targets)
     dataset <- dataset[,1:ncol(dataset)-1]
     targets.index <- targets.index + 1
-    if (num_nodes >=1000) {
-        max_degree = num_nodes/10
-    }
-    else {
-        max_degree=integer(0)
-    }
     sp_gies(dataset, targets, targets.index, save_path="./", max_degree=max_degree)
 }
 
-run_gies <- function(num_nodes) {
+run_gies <- function(num_nodes, max_degree) {
     # # read data
     dataset_path <- file.path(paste("../random_test_set_fewer_",as.character(num_nodes),"_small/data_joint_0.csv", sep=""), fsep=.Platform$file.sep)
     dataset <- read.table(dataset_path, sep=",", header=TRUE)
@@ -43,12 +37,6 @@ run_gies <- function(num_nodes) {
     targets <- append(targets_init, targets)
     dataset <- dataset[,1:ncol(dataset)-1]
     targets.index <- targets.index + 1
-    if (num_nodes >=1000) {
-        max_degree = num_nodes/10
-    }
-    else {
-        max_degree=integer(0)
-    }
     gies(dataset, targets, targets.index, save_path="./", max_degree=max_degree)
 }
 
@@ -61,35 +49,11 @@ run_igsp <- function(num_nodes) {
     iv_data = read.table(int_dataset_path, sep=",", header=TRUE)
     iv_data <- iv_data[,1:ncol(iv_data)-1]
 
-    #get data as input
-    data.list = list()
-    t.list = list()
-    data.list[[1]] = obs_data
-    i = 2
-    # Loop through interventional data rows and add to list
-    cols = colnames(iv_data)
-    for (row in (1:dim(iv_data)[1]) ) {
-    	d = t(iv_data[row])
-	colnames(d) <- cols
-	rownames(d) <- row
-    	data.list[[i]] = d
-        t.list[[i]] = row
-        i = i + 1
-    }
-    method <- "hsic.gamma"
-
-    #prepare for sufficient statistics and intervention targets
-    #suffstat <- list(data=data.list[[1]], ic.method=method)
-    suffstat <- list(C=cor(data.list[[1]]), n=nrow(data.list[[1]]))
-    alpha <-1e-3
-    
-    #include observational dataset as an intervention
-    intdata <- lapply(1:length(t.list), function(t) cbind(data.list[[t]], intervention_index=t) )
-    inttargets <- t.list[1:length(t.list)]
-    grspdag <- sp.restart.alg(suffstat, intdata, inttargets, alpha)
+    igsp(obs_data, iv_data, save_path = "./")
 }
 
 graph_nodes <- list(10,100,1000,2000)
+maximum_degree <- list(integer(0), 100)
 num_repeats = 3
 
 for (n in 1:num_repeats) {
@@ -99,17 +63,23 @@ for (n in 1:num_repeats) {
     }
 }
 
-for (n in 1:num_repeats) {
-    for (i in graph_nodes) {
-        print(paste("Number of nodes is ", i))
-        run_sp_gies(i)
+for (m in maximum_degree) {
+    print(paste("Max degree is ", m))
+    for (n in 1:num_repeats) {
+        for (i in graph_nodes) {
+            print(paste("Number of nodes is ", i))
+            run_sp_gies(i, m)
+        }
     }
 }
 
-for (n in 1:num_repeats) {
-    for (i in graph_nodes) {
-        print(paste("Number of nodes is ", i))
-        run_gies(i)
+for (m in maximum_degree) {
+    print(paste("Max degree is ", m))
+    for (n in 1:num_repeats) {
+        for (i in graph_nodes) {
+            print(paste("Number of nodes is ", i))
+            run_gies(i, m)
+        }
     }
 }
 

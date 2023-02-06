@@ -70,10 +70,6 @@ run_igsp <- function(num_nodes) {
     #suffstat <- list(data=data.list[[1]], ic.method=method)
     suffstat <- list(C=cor(data.list[[1]]), n=nrow(data.list[[1]]))
     alpha <-1e-3
-
-
-    print(data.list[[1]])
-    print(data.list[[2]])
     
     #include observational dataset as an intervention
     intdata <- lapply(1:length(t.list), function(t) cbind(data.list[[t]], intervention_index=t) )

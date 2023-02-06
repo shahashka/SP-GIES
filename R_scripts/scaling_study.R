@@ -54,9 +54,13 @@ run_igsp <- function(num_nodes) {
     t.list = list()
     data.list[[1]] = obs_data
     i = 2
-    # Loop through interventional data rows and add to lis
+    # Loop through interventional data rows and add to list
+    cols = colnames(iv_data)
     for (row in (1:dim(iv_data)[1]) ) {
-    	data.list[[i]] = t(iv_data[row])
+    	d = t(iv_data[row])
+	colnames(d) <- cols
+	rownames(d) <- row
+    	data.list[[i]] = d
         t.list[[i]] = row
         i = i + 1
     }

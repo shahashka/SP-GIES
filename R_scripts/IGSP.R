@@ -1,7 +1,7 @@
 # CODE TAKEN FROM https://github.com/csquires/utigsp/blob/master/R_algs/run_igsp.R
 # Related paper Permutation-Based Causal Structure Learning with Unknown Intervention Targets
 library(pcalg)
-#library(kpcalg)
+library(kpcalg)
 library(graph)
 library(sets)
 library(tictoc)

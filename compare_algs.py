@@ -195,5 +195,5 @@ def test_random():
 
 
 #test_regulondb()
-test_random()
-test_dream4()
+#test_random()
+#test_dream4()

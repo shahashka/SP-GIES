@@ -1,5 +1,6 @@
 library(pcalg)
 library(tictoc)
+library(igraph)
 source("../cupc/cuPC.R")
 
 ## This file contains functions for calling the SP-GIES algorithm which is a two-part algorithm that first calls
@@ -23,6 +24,8 @@ run_from_file_sp_gies <- function(dataset_path, target_path, target_index_path, 
     if (skeleton_path) {
         skeleton <- read.table(skeleton_path, sep=",", header=FALSE)
         skeleton <- as(skeleton,"matrix")
+        #make symmetric
+        skeleton[lower.tri(skeleton)] = t(skeleton)[lower.tri(skeleton)]
         skeleton <- as.data.frame(skeleton)
         skeleton <- fixedGaps == 0
         class(skeleton) <- "logical"
@@ -37,12 +40,15 @@ run_from_file_sp_gies <- function(dataset_path, target_path, target_index_path, 
 # and save the adjacency matrix in the save_path. Also saves the adjacency matrix of the skeleton (output of the cupc algorithm)
 # if save_pc is set to TRUE
 # Also prints the time to solution which includes calculating the sufficient statistics for the PC algorithm
-sp_gies <- function(dataset, targets, targets.index, save_path, save_pc=FALSE) {
-    tic()
+sp_gies <- function(dataset, targets, targets.index, save_path, save_pc=FALSE, max_degree=integer(0)) {
+    tic("cupc")
+    tic("gies")
     corrolationMatrix <- cor(dataset)
     p <- ncol(dataset)
     suffStat <- list(C = corrolationMatrix, n = nrow(dataset))
     cuPC_fit <- cu_pc(suffStat, p=p, alpha=0.01)
+    print("The total time consumed by cuPC is:")
+    toc()
 
     # TODO we don't want this included in time to solution
     if (save_pc) {
@@ -56,10 +62,10 @@ sp_gies <- function(dataset, targets, targets.index, save_path, save_pc=FALSE) {
     class(fixedGaps) <- "logical"
 
     score <- new("GaussL0penIntScore", data = dataset, targets=targets, target.index=targets.index)
-    result <- pcalg::gies(score, fixedGaps=fixedGaps, targets=targets)
+    result <- pcalg::gies(score, fixedGaps=fixedGaps, targets=targets, maxDegree=max_degree)
     print("The total time consumed by SP-GIES is:")
     toc()
-
+    print(max(degree(graph_from_adjacency_matrix(result$repr$weight.mat(), weighted=TRUE))))
     write.csv(result$repr$weight.mat() ,row.names = FALSE, file = paste(save_path, 'sp-gies-adj_mat.csv',sep = ''))
  }
 

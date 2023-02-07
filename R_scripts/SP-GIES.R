@@ -9,7 +9,7 @@ source("../cupc/cuPC.R")
 
 # Given file paths for the dataset, targets and target indices, run SP-GIES
 # Optionally provide a path to a pre-generated skeleton
-run_from_file_sp_gies <- function(dataset_path, target_path, target_index_path, save_path, skeleton_path=FALSE, save_pc=FALSE) {
+run_from_file_sp_gies <- function(dataset_path, target_path, target_index_path, save_path, threshold=0, skeleton_path=FALSE, save_pc=FALSE) {
     dataset <- read.table(dataset_path, sep=",", header=FALSE)
     targets <- read.table(target_path, sep=",", header=FALSE)
     targets.index <- read.table(target_index_path, sep=",", header=FALSE)
@@ -24,10 +24,11 @@ run_from_file_sp_gies <- function(dataset_path, target_path, target_index_path, 
     if (skeleton_path) {
         skeleton <- read.table(skeleton_path, sep=",", header=FALSE)
         skeleton <- as(skeleton,"matrix")
+        skeleton[skeleton < threshold] = 0
         #make symmetric
         skeleton[lower.tri(skeleton)] = t(skeleton)[lower.tri(skeleton)]
         skeleton <- as.data.frame(skeleton)
-        skeleton <- fixedGaps == 0
+        skeleton <- skeleton == 0
         class(skeleton) <- "logical"
         sp_gies_from_skeleton(dataset, targets, targets.index, skeleton, save_path, save_pc)
     }

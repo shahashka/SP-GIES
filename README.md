@@ -7,7 +7,7 @@ This achieves up to 4x speedup compared to GIES.
 ### Setup
 Create conda environment using:
 ```
-conda create --name <name> --file environment.yml 
+conda env create --name <name> --file=environment.yml 
 ```
 To use the cupc and CDT submodules, initialize after cloning and compile:
 ```

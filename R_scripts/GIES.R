@@ -39,7 +39,6 @@ gies <- function(dataset, targets, targets.index, save_path, max_degree=integer(
     result <- pcalg::gies(score, fixedGaps=NULL, targets=targets, maxDegree=max_degree)
     print("The total time consumed by GIES is:")
     toc()
-    print(max(degree(graph_from_adjacency_matrix(result$repr$weight.mat(), weighted=TRUE))))
     write.csv(result$repr$weight.mat() ,row.names = FALSE, file = paste(save_path, 'gies-adj_mat.csv',sep = ''))
 }
 

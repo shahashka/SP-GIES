@@ -26,12 +26,10 @@ run_from_file_sp_gies <- function(dataset_path, target_path, target_index_path, 
         skeleton <- as(skeleton,"matrix")
         skeleton[abs(skeleton) < threshold] = 0
 	skeleton[abs(skeleton) >= threshold] = 1
-	print(sum(skeleton))
-        skeleton <- as.data.frame(skeleton)
+	skeleton <- as.data.frame(skeleton)
         skeleton <- skeleton == 0
         class(skeleton) <- "logical"
-	print(sum(skeleton))
-        sp_gies_from_skeleton(dataset, targets, targets.index, skeleton, save_path, save_pc)
+	sp_gies_from_skeleton(dataset, targets, targets.index, skeleton, save_path, save_pc)
     }
     else {
         sp_gies(dataset, targets, targets.index, save_path, save_pc)

@@ -221,7 +221,7 @@ run_from_file_igsp <- function(dataset_path, target_path, target_index_path, sav
     i = 2
     # Loop through interventional data rows and add to list
     cols = colnames(iv_data)
-    for (target in (1:length(targets)) {
+    for (target in (1:length(targets))) {
     	rows = int_data_inds[int_data_inds==targets]
     	rows = iv_data[rows]
     	data.list[[i]] = rows

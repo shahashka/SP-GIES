@@ -1,4 +1,4 @@
-from causaldag import unknown_target_igsp
+from causaldag import unknown_target_igsp,igsp, gsp
 import conditional_independence
 import pandas as pd
 import numpy as np
@@ -28,7 +28,7 @@ def run_regulon_db():
         targets_list.append(targets.iloc[i])
     nodes=np.arange(1,data.shape[1]+1)
 
-    setting_list = [dict(known_interventions=[t]) if type(t) !=list else dict(known_interventions=t) for t in targets_list]
+    setting_list = [dict(interventions=[t]) if type(t) !=list else dict(interventions=t) for t in targets_list]
     print(obs_data_no_targets.shape, len(targets_list), len(nodes), len(setting_list), len(iv_samples_list))
     obs_suffstat = conditional_independence.partial_correlation_suffstat(obs_data_no_targets)
     invariance_suffstat = conditional_independence.gauss_invariance_suffstat(obs_data_no_targets, iv_samples_list)
@@ -38,39 +38,44 @@ def run_regulon_db():
     alpha_inv = 1e-3
     ci_tester = conditional_independence.MemoizedCI_Tester(conditional_independence.partial_correlation_test,
                                                            obs_suffstat, alpha=alpha)
-    invariance_tester = conditional_independence.MemoizedInvarianceTester(conditional_independence.kci_invariance_test,
+    invariance_tester = conditional_independence.MemoizedInvarianceTester(conditional_independence.gauss_invariance_suffstat,
                                                                           invariance_suffstat, alpha=alpha_inv)
 
-    est_dag, _ = unknown_target_igsp(setting_list, nodes, ci_tester, invariance_tester)
-    est_adj = edge_to_adj(est_dag.arcs, list(est_dag.nodes))
-    np.savetxt("./regulondb/igsp_adj.csv", est_adj, delimiter=",")
-    print("saved regulondb")
+    est_dag = igsp(setting_list, nodes, ci_tester, invariance_tester)
+    est_dag_obs = gsp(nodes,ci_tester)
+
+    np.savetxt("./regulondb/igsp_adj.csv", edge_to_adj(est_dag.arcs, list(est_dag.nodes)), delimiter=",")
+    np.savetxt("./regulondb/obs_igsp_adj.csv", edge_to_adj(est_dag_obs.arcs, list(est_dag.nodes)), delimiter=",")
+
 
 def run_dream4():
-    data = pd.read_csv("./insilico_size10_3/insilico_size10_3_combine_unnorm.csv")
-    obs_data = data.loc[data['target']==0]
-    int_data = data.loc[data['target'] != 0]
-    targets_list = set(list(int_data['target'].to_numpy()))
+    for d in range(3,4):
+        data = pd.read_csv("./insilico_size10_{}/insilico_size10_{}_combine.csv".format(d,d))
+        obs_data = data.loc[data['target']==0]
+        int_data = data.loc[data['target'] != 0]
+        targets_list = set(list(int_data['target'].to_numpy()))
 
-    obs_data = obs_data.loc[:, obs_data.columns != 'target'].to_numpy()
+        obs_data = obs_data.loc[:, obs_data.columns != 'target'].to_numpy()
 
-    iv_samples_list = [int_data.loc[int_data['target'] == t] for t in targets_list]
-    iv_samples_list = [inter.loc[:, inter.columns != 'target'] for inter in iv_samples_list]
+        iv_samples_list = [int_data.loc[int_data['target'] == t] for t in targets_list]
+        iv_samples_list = [inter.loc[:, inter.columns != 'target'] for inter in iv_samples_list]
 
-    setting_list = [dict(known_interventions=[t]) for t in targets_list]
+        setting_list = [dict(interventions=[t]) for t in targets_list]
 
-    obs_suffstat = conditional_independence.partial_correlation_suffstat(obs_data)
-    invariance_suffstat = conditional_independence.gauss_invariance_suffstat(obs_data, iv_samples_list)
-    alpha = 1e-3
-    alpha_inv = 1e-3
-    ci_tester = conditional_independence.MemoizedCI_Tester(conditional_independence.partial_correlation_test,
-                                                           obs_suffstat, alpha=alpha)
-    invariance_tester = conditional_independence.MemoizedInvarianceTester(conditional_independence.gauss_invariance_test,
-                                                                          invariance_suffstat, alpha=alpha_inv)
+        obs_suffstat = conditional_independence.partial_correlation_suffstat(obs_data)
+        invariance_suffstat = conditional_independence.gauss_invariance_suffstat(obs_data, iv_samples_list)
+        alpha = 1e-3
+        alpha_inv = 1e-3
+        ci_tester = conditional_independence.MemoizedCI_Tester(conditional_independence.partial_correlation_test,
+                                                               obs_suffstat, alpha=alpha)
+        invariance_tester = conditional_independence.MemoizedInvarianceTester(conditional_independence.gauss_invariance_test,
+                                                                              invariance_suffstat, alpha=alpha_inv)
 
-    est_dag, _ = unknown_target_igsp(setting_list, targets_list, ci_tester, invariance_tester)
-    est_adj = edge_to_adj(est_dag.arcs, list(est_dag.nodes))
-    np.savetxt("./insilico_size10_3/igsp_adj.csv", est_adj, delimiter=",")
+        est_dag = igsp(setting_list, targets_list, ci_tester, invariance_tester)
+        est_dag_obs = gsp(nodes, ci_tester)
+
+        np.savetxt("./insilico_size10_{}/igsp_adj.csv".format(d), edge_to_adj(est_dag.arcs, list(est_dag.nodes)), delimiter=",")
+        np.savetxt("./insilico_size10_{}/obs_igsp_adj.csv".format(d), edge_to_adj(est_dag_obs.arcs, list(est_dag.nodes)), delimiter=",")
 
 def run_random():
     for network in ["ER", "scale", "small"]:
@@ -85,7 +90,7 @@ def run_random():
             targets_list = set(list(int_data['target'].to_numpy()))
             nodes = targets_list
 
-            setting_list = [dict(known_interventions=[t]) for t in targets_list]
+            setting_list = [dict(interventions=[t]) for t in targets_list]
 
             obs_suffstat = conditional_independence.partial_correlation_suffstat(obs_data_no_targets)
             invariance_suffstat = conditional_independence.gauss_invariance_suffstat(obs_data_no_targets,
@@ -95,13 +100,48 @@ def run_random():
             ci_tester = conditional_independence.MemoizedCI_Tester(conditional_independence.partial_correlation_test,
                                                                    obs_suffstat, alpha=alpha)
             invariance_tester = conditional_independence.MemoizedInvarianceTester(
-                conditional_independence.kci_invariance_test,
+                conditional_independence.gauss_invariance_suffstat,
                 invariance_suffstat, alpha=alpha_inv)
 
-            est_dag, _ = unknown_target_igsp(setting_list, nodes, ci_tester, invariance_tester)
-            est_adj = edge_to_adj(est_dag.arcs, list(est_dag.nodes))
-            np.savetxt("./random_test_set_10_{}/igsp_{}_adj.csv".format(network,i), est_adj, delimiter=",")
+            est_dag = igsp(setting_list, nodes, ci_tester, invariance_tester)
+            est_dag_obs = gsp(nodes, ci_tester)
 
-#run_regulon_db()
+            np.savetxt("./random_test_set_10_{}/igsp_{}_adj.csv".format(network,i), edge_to_adj(est_dag.arcs, list(est_dag.nodes)), delimiter=",")
+            np.savetxt("./random_test_set_10_{}/obs_igsp_{}_adj.csv".format(network,i), edge_to_adj(est_dag_obs.arcs, list(est_dag.nodes)), delimiter=",")
+
+
+
+def run_random_large():
+        data = pd.read_csv("./random_test_set_1000_{}/data_joint_{}.csv".format("small_world", 0))
+        obs_data = data.iloc[data['target'] == 0]
+        int_data = data.iloc[data['target'] != 0]
+        obs_data_no_targets = obs_data.loc[:, obs_data.columns != 'target'].to_numpy()
+        int_data_no_targets = int_data.loc[:, int_data.columns != 'target']
+        iv_samples_list = [np.expand_dims(row.to_numpy(), axis=0) for _, row in int_data_no_targets.iterrows()]
+
+        targets_list = set(list(int_data['target'].to_numpy()))
+        nodes = targets_list
+
+        setting_list = [dict(interventions=[t]) for t in targets_list]
+
+        obs_suffstat = conditional_independence.partial_correlation_suffstat(obs_data_no_targets)
+        invariance_suffstat = conditional_independence.gauss_invariance_suffstat(obs_data_no_targets,
+                                                                                 iv_samples_list)
+        alpha = 1e-3
+        alpha_inv = 1e-3
+        ci_tester = conditional_independence.MemoizedCI_Tester(conditional_independence.partial_correlation_test,
+                                                               obs_suffstat, alpha=alpha)
+        invariance_tester = conditional_independence.MemoizedInvarianceTester(
+            conditional_independence.gauss_invariance_suffstat,
+            invariance_suffstat, alpha=alpha_inv)
+
+        est_dag = igsp(setting_list, nodes, ci_tester, invariance_tester)
+        est_dag_obs = gsp(nodes, ci_tester)
+
+        np.savetxt("./random_test_set_1000_{}/igsp_{}_adj.csv".format("small_norm",0), edge_to_adj(est_dag.arcs, list(est_dag.nodes)), delimiter=",")
+        np.savetxt("./random_test_set_1000_{}/obs_igsp_{}_adj.csv".format("small_norm",0), edge_to_adj(est_dag_obs.arcs, list(est_dag.nodes)), delimiter=",")
+
+run_regulon_db()
 run_dream4()
-#run_random()
+run_random()
+run_random_large()

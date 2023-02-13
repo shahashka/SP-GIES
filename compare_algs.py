@@ -8,6 +8,7 @@ import warnings
 import time
 import cdt
 from cdt.causality.graph import GIES, PC
+from sklearn.metrics import precision_score
 warnings.filterwarnings("ignore")
 font = {'family' : 'normal',
         'weight' : 'bold',
@@ -78,13 +79,27 @@ def get_scores(alg_names, networks, ground_truth):
 def test_regulondb():
     print("REGULONDB")
     true_adj = pd.read_csv("./regulondb/ground_truth.csv", header=None).values
+    print(np.allclose(true_adj, true_adj.T, rtol=1e-8, atol=1e-8))
     genes = [i[0] for i in pd.read_csv("./regulondb/genes.txt", header=None).values]
     true_graph = adj_to_dag(true_adj, all_nodes=genes)
 
     aracne_network = pd.read_csv("./regulondb/network.txt", sep='\t',header=0)
     clr_network = pd.read_csv("./regulondb/adj_mat.csv", header=None).to_numpy()
-    sp_gies_network = pd.read_csv("./regulondb/sp-gies-adj_mat.csv", header=0).to_numpy()
-    igsp_network = pd.read_csv("./regulondb/igsp_adj.csv", header=0).to_numpy()
+    threshold = 6.917 # This achieves 60% precision
+    clr_network[np.abs(clr_network) < threshold] = 0
+    clr_network[np.abs(clr_network) >= threshold] = 1
+    print(np.allclose(clr_network, clr_network.T, rtol=1e-2, atol=1e-2))
+    print(np.sum(clr_network))
+    true_adj[np.abs(true_adj) >0] = 1
+    print(precision_score(true_adj.flatten(), clr_network.flatten()))
+
+    sp_gies_network = pd.read_csv("./regulondb/clr_skel_sp-gies-adj_mat.csv", header=0).to_numpy()
+    sp_gies_network[np.abs(sp_gies_network) > 0] = 1
+    print(np.sum(sp_gies_network))
+    print(np.min(clr_network-sp_gies_network))
+    print(precision_score(clr_network.flatten(), sp_gies_network.flatten()))
+
+   # igsp_network = pd.read_csv("./regulondb/igsp_adj.csv", header=0).to_numpy()
     #gies_network =  pd.read_csv("./regulondb/gies-adj_mat.csv", header=0).to_numpy()
     # gies_o_network =  pd.read_csv("./regulondb/gies-o-adj_mat.csv", header=0).to_numpy()
     #pc_network = pd.read_csv("./regulondb/cupc_adj_mat.csv", header=0).to_numpy()
@@ -101,8 +116,6 @@ def test_regulondb():
     aracne_graph = edge_to_dag(edges_pos)
     aracne_graph.add_nodes_from(genes)
 
-    threshold = 6.917 # This achieves 60% precision
-    clr_network[clr_network < threshold] = 0
     clr_graph = adj_to_dag(clr_network,genes)
 
     #pc_network = pc_network[inds][:,inds]
@@ -200,7 +213,38 @@ def test_random():
         get_scores(["PC-O", "GIES-O", "GIES-IO", "SP-GIES-IO", "IGSP-O", "IGSP-IO", "EMPTY"],
                    [pc, gies_o, gies, sp_gies, igsp_o, igsp, np.zeros((num_nodes, num_nodes))], ground_truth)
 
+def test_random_large():
+    num_nodes = 1000
+    random = ["small_norm"]
+    edges = pd.read_csv( "./random_test_set_{}_{}/bn_network_{}.csv".format(num_nodes,r, n), header=0)
+    df = pd.read_csv("./random_test_set_{}_{}/data_{}.csv".format(num_nodes,r,n), header=0)
+
+    edges_pos = [(r['start'], r['end']) for i, r in edges.iterrows() if r['edge'] == 1]
+    true_graph = edge_to_dag(edges_pos)
+    nodes = list(df.columns)
+    nodes.remove('target')
+    true_graph.add_nodes_from(nodes)
+    df = df.drop('target', axis=1)
+    n=0
+    aracne_network = pd.read_csv("./random_test_set_{}_{}/network.txt".format(num_nodes,random), sep='\t', header=0)
+    clr_network = pd.read_csv("./random_test_set_{}_{}/adj_mat.csv".format(num_nodes, random), header=None).to_numpy()
+    sp_gies_network = pd.read_csv("./random_test_set_{}_{}/{}_sp-gies-adj_mat.csv".format(num_nodes,random,n), header=0).to_numpy()
+    gies_network =  pd.read_csv("./random_test_set_{}_{}/{}_gies-adj_mat.csv".format(num_nodes,random,n), header=0).to_numpy()
+    gies_o_network = pd.read_csv("./random_test_set_{}_{}/obs_{}_gies-adj_mat.csv".format(num_nodes,random, n), header=0).to_numpy()
+    pc_network = pd.read_csv("./random_test_set_{}_{}/obs_{}_cupc-adj_mat.csv".format(num_nodes,random, n), header=0).to_numpy()
+    igsp_network = pd.read_csv("./random_test_set_{}_{}/igsp_{}_adj.csv".format(num_nodes,random, n), header=None).to_numpy()
+    igsp_o_network = pd.read_csv("./random_test_set_{}_{}/obs_igsp_{}_adj.csv".format(num_nodes,random, n), header=None).to_numpy()
+
+    sp_gies_graph = adj_to_dag(sp_gies_network, nodes)
+    gies_graph = adj_to_dag(gies_network, nodes)
+    pc_graph = adj_to_dag(pc_network, nodes)
+    gies_o_graph = adj_to_dag(gies_o_network, nodes)
+    igsp_graph = adj_to_dag(igsp_network, nodes)
+    igsp_o_graph = adj_to_dag(igsp_o_network, nodes)
+
+    get_scores(["PC-O", "GIES-O", "GIES-IO", "SP-GIES-IO", "IGSP-O", "IGSP-IO", "EMPTY"],
+               [pc_graph, gies_o_graph, gies_graph, sp_gies_graph, igsp_o_graph, igsp_graph, np.zeros((num_nodes, num_nodes))], ground_truth)
 
 #test_regulondb()
 #test_random()
-#test_dream4()
+test_dream4()

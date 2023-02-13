@@ -35,11 +35,13 @@ gies <- function(dataset, targets, targets.index, save_path, max_degree=integer(
     toc()
     print(max(degree(graph_from_adjacency_matrix(result$repr$weight.mat(), weighted=TRUE))))
     write.csv(result$repr$weight.mat() ,row.names = FALSE, file = paste(save_path, 'gies-adj_mat.csv',sep = ''))
+    plot(x = result$essgraph, y = "ANY")
+    print("test")
 }
 
 # # Example read data
-dataset_path <- file.path("../regulondb/data_smaller.csv", fsep=.Platform$file.sep)
-target_path <- file.path("../regulondb/targets.csv", fsep=.Platform$file.sep)
-target_index_path <- file.path("../regulondb/target_index.csv", fsep=.Platform$file.sep)
+# dataset_path <- file.path("../regulondb/data_smaller.csv", fsep=.Platform$file.sep)
+# target_path <- file.path("../regulondb/targets.csv", fsep=.Platform$file.sep)
+# target_index_path <- file.path("../regulondb/target_index.csv", fsep=.Platform$file.sep)
 
 #run_from_file_gies(dataset_path, target_path, target_index_path)

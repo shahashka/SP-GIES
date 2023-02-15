@@ -6,6 +6,17 @@ source("GIES.R")
 source("SP-GIES.R")
 source("IGSP.R")
 
+args = commandArgs(trailingOnly=TRUE)
+
+# test if there is at least one argument: if not, return an error
+if (length(args)==0) {
+  stop("At least one argument must be supplied (sp_gies, gies, igsp)", call.=FALSE)
+} else if (length(args)==1) {
+  # default output file
+  args[2] = "out.txt"
+}
+
+
 ## Scaling study used in paper. Runs small-world random network dataset of size 10,100,1000,2000 nodes.
 ## Compares GIES and SP-GIES. SP-GIES achieves ~4x speedup
 ## First run gen_scaling_data.sh script to generate all data needed for this study
@@ -56,31 +67,33 @@ graph_nodes <- list(10,100,1000,2000)
 maximum_degree <- list(integer(0), 100)
 num_repeats = 3
 
-for (n in 1:num_repeats) {
-    for (i in graph_nodes) {
-        print(paste("Number of nodes is ", i))
-        run_igsp(i)
-    }
-}
-
-for (m in maximum_degree) {
-    print(paste("Max degree is ", m))
-    for (n in 1:num_repeats) {
-        for (i in graph_nodes) {
-            print(paste("Number of nodes is ", i))
-            run_sp_gies(i, m)
-        }
-    }
-}
-
-for (m in maximum_degree) {
-    print(paste("Max degree is ", m))
-    for (n in 1:num_repeats) {
-        for (i in graph_nodes) {
-            print(paste("Number of nodes is ", i))
-            run_gies(i, m)
-        }
-    }
+if (args[1] == "sp_gies") {
+	for (n in 1:num_repeats) {
+	    for (i in graph_nodes) {
+		print(paste("Number of nodes is ", i))
+		run_igsp(i)
+	    }
+	}
+} else if (args[1] == "gies") {
+	for (m in maximum_degree) {
+	    print(paste("Max degree is ", m))
+	    for (n in 1:num_repeats) {
+		for (i in graph_nodes) {
+		    print(paste("Number of nodes is ", i))
+		    run_sp_gies(i, m)
+		}
+	    }
+	}
+} else {
+	for (m in maximum_degree) {
+	    print(paste("Max degree is ", m))
+	    for (n in 1:num_repeats) {
+		for (i in graph_nodes) {
+		    print(paste("Number of nodes is ", i))
+		    run_gies(i, m)
+		}
+	    }
+	}
 }
 
 # let's see if it can run the largest one as a test

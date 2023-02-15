@@ -1,4 +1,5 @@
 from graphical_models import rand, GaussDAG
+from matplotlib import pyplot as plt
 import networkx as nx
 import numpy as np
 import argparse
@@ -33,7 +34,11 @@ def get_random_graph_data(working_dir, graph_type, nsamples, n, parameters, toNo
     else:
         print("Unsupported random graph")
         return
-    nx.draw(random_graph_model)
+    nx.draw(random_graph_model(n))
+
+    if not os.path.isdir(working_dir):
+        os.makedirs(working_dir)
+
     plt.savefig("{}/fig.png".format(working_dir))
     for g in range(num_graphs):
         dag = rand.directed_random_graph(n, random_graph_model)
@@ -53,8 +58,6 @@ def get_random_graph_data(working_dir, graph_type, nsamples, n, parameters, toNo
         df = pd.DataFrame(data=data, columns=nodes)
         df['target'] = np.zeros(data.shape[0])
 
-        if not os.path.isdir(working_dir):
-            os.makedirs(working_dir)
         df.to_csv("{}/data_{}.csv".format(working_dir,g), index=False)
         df.iloc[[0]].to_csv("{}/data_wt_{}.csv".format(working_dir, g), index=False)
         start = [e[0]  for e in arcs] # make sure nodes start from 1 to avoid issues with R code

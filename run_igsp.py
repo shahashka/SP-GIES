@@ -25,7 +25,8 @@ def run_regulon_db():
 
     targets_list = []
     for i in np.arange(targets.shape[0]):
-        targets_list.append(targets.iloc[i])
+        targets_list.append(list(targets.iloc[i].dropna().values))
+    print(targets_list)
     nodes=np.arange(1,data.shape[1]+1)
 
     setting_list = [dict(interventions=[t]) if type(t) !=list else dict(interventions=t) for t in targets_list]
@@ -38,7 +39,7 @@ def run_regulon_db():
     alpha_inv = 1e-3
     ci_tester = conditional_independence.MemoizedCI_Tester(conditional_independence.partial_correlation_test,
                                                            obs_suffstat, alpha=alpha)
-    invariance_tester = conditional_independence.MemoizedInvarianceTester(conditional_independence.gauss_invariance_suffstat,
+    invariance_tester = conditional_independence.MemoizedInvarianceTester(conditional_independence.gauss_invariance_test,
                                                                           invariance_suffstat, alpha=alpha_inv)
 
     est_dag = igsp(setting_list, nodes, ci_tester, invariance_tester)
@@ -49,7 +50,8 @@ def run_regulon_db():
 
 
 def run_dream4():
-    for d in range(3,4):
+    for d in range(1,6):
+        print(d)
         data = pd.read_csv("./insilico_size10_{}/insilico_size10_{}_combine.csv".format(d,d))
         obs_data = data.loc[data['target']==0]
         int_data = data.loc[data['target'] != 0]
@@ -72,7 +74,7 @@ def run_dream4():
                                                                               invariance_suffstat, alpha=alpha_inv)
 
         est_dag = igsp(setting_list, targets_list, ci_tester, invariance_tester)
-        est_dag_obs = gsp(nodes, ci_tester)
+        est_dag_obs = gsp(targets_list, ci_tester)
 
         np.savetxt("./insilico_size10_{}/igsp_adj.csv".format(d), edge_to_adj(est_dag.arcs, list(est_dag.nodes)), delimiter=",")
         np.savetxt("./insilico_size10_{}/obs_igsp_adj.csv".format(d), edge_to_adj(est_dag_obs.arcs, list(est_dag.nodes)), delimiter=",")
@@ -141,7 +143,7 @@ def run_random_large():
         np.savetxt("./random_test_set_1000_{}/igsp_{}_adj.csv".format("small_norm",0), edge_to_adj(est_dag.arcs, list(est_dag.nodes)), delimiter=",")
         np.savetxt("./random_test_set_1000_{}/obs_igsp_{}_adj.csv".format("small_norm",0), edge_to_adj(est_dag_obs.arcs, list(est_dag.nodes)), delimiter=",")
 
-run_regulon_db()
+#run_regulon_db()
 run_dream4()
-run_random()
-run_random_large()
+#run_random()
+#run_random_large()

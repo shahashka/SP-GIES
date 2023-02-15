@@ -21,16 +21,15 @@ run_from_file_sp_gies <- function(dataset_path, target_path, target_index_path, 
     targets <- append(targets_init, targets)
     targets.index <- unlist(targets.index)
 
-    if (skeleton_path) {
+    if (is.character(skeleton_path)) {
         skeleton <- read.table(skeleton_path, sep=",", header=FALSE)
         skeleton <- as(skeleton,"matrix")
-        skeleton[skeleton < threshold] = 0
-        #make symmetric
-        skeleton[lower.tri(skeleton)] = t(skeleton)[lower.tri(skeleton)]
-        skeleton <- as.data.frame(skeleton)
+        skeleton[abs(skeleton) < threshold] = 0
+	skeleton[abs(skeleton) >= threshold] = 1
+	skeleton <- as.data.frame(skeleton)
         skeleton <- skeleton == 0
         class(skeleton) <- "logical"
-        sp_gies_from_skeleton(dataset, targets, targets.index, skeleton, save_path, save_pc)
+	sp_gies_from_skeleton(dataset, targets, targets.index, skeleton, save_path, save_pc)
     }
     else {
         sp_gies(dataset, targets, targets.index, save_path, save_pc)
@@ -63,18 +62,21 @@ sp_gies <- function(dataset, targets, targets.index, save_path, save_pc=FALSE, m
     class(fixedGaps) <- "logical"
 
     score <- new("GaussL0penIntScore", data = dataset, targets=targets, target.index=targets.index)
-    result <- pcalg::gies(score, fixedGaps=fixedGaps, targets=targets, maxDegree=max_degree)
+    result <- pcalg::gies(score, fixedGaps=fixedGaps, targets=targets, maxDegree=max_degree, adaptive=c('vstructures')
     print("The total time consumed by SP-GIES is:")
     toc()
     print(max(degree(graph_from_adjacency_matrix(result$repr$weight.mat(), weighted=TRUE))))
     write.csv(result$repr$weight.mat() ,row.names = FALSE, file = paste(save_path, 'sp-gies-adj_mat.csv',sep = ''))
+    write.csv(result$essgraph ,row.names = FALSE, file = paste(save_path, 'ess_sp-gies-adj_mat.csv',sep = ''))
+
  }
 
 # Same method as above, except skeleton comes from another algorithm. fixedGaps is a logical array that
 # is  FALSE for all edges in the skeleton and TRUE otherwise
  sp_gies_from_skeleton <- function(dataset, targets, targets.index, fixedGaps, save_path, save_pc=FALSE) {
+    tic()
     score <- new("GaussL0penIntScore", data = dataset, targets=targets, target.index=targets.index)
-    result <- pcalg::gies(score, fixedGaps=fixedGaps, targets=targets)
+    result <- pcalg::gies(score, fixedGaps=fixedGaps, targets=targets, adaptive=c('vstructures')
     print("The total time consumed by SP-GIES is:")
     toc()
     write.csv(result$repr$weight.mat() ,row.names = FALSE, file = paste(save_path, 'sp-gies-adj_mat.csv',sep = ''))

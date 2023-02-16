@@ -11,9 +11,6 @@ args = commandArgs(trailingOnly=TRUE)
 # test if there is at least one argument: if not, return an error
 if (length(args)==0) {
   stop("At least one argument must be supplied (sp_gies, gies, igsp)", call.=FALSE)
-} else if (length(args)==1) {
-  # default output file
-  args[2] = "out.txt"
 }
 
 
@@ -67,14 +64,14 @@ graph_nodes <- list(10,100,1000,2000)
 maximum_degree <- list(integer(0), 100)
 num_repeats = 3
 
-if (args[1] == "sp_gies") {
+if (args[1] == "igsp") {
 	for (n in 1:num_repeats) {
 	    for (i in graph_nodes) {
 		print(paste("Number of nodes is ", i))
 		run_igsp(i)
 	    }
 	}
-} else if (args[1] == "gies") {
+} else if (args[1] == "sp-gies") {
 	for (m in maximum_degree) {
 	    print(paste("Max degree is ", m))
 	    for (n in 1:num_repeats) {

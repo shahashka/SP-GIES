@@ -142,6 +142,6 @@ def run_random_large():
         np.savetxt("./random_test_set_1000_{}/obs_igsp_{}_adj.csv".format("small_norm",0), edge_to_adj(est_dag_obs.arcs, list(est_dag.nodes)), delimiter=",")
 
 run_regulon_db()
-run_dream4()
-run_random()
+# run_dream4()
+# run_random()
 run_random_large()

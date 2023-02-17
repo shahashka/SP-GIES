@@ -91,15 +91,15 @@ def test_regulondb():
     print(np.sum(clr_network))
     true_adj[np.abs(true_adj) >0] = 1
     print(precision_score(true_adj.flatten(), clr_network.flatten()))
-
-    sp_gies_network = pd.read_csv("./regulondb/clr_skel_sp-gies-adj_mat.csv", header=0).to_numpy()
+    
+    sp_gies_network = pd.read_csv("./regulondb/pc_sp-gies-adj_mat.csv", header=0).to_numpy()
     sp_gies_network[np.abs(sp_gies_network) > 0] = 1
     print(np.sum(sp_gies_network))
     print(np.min(clr_network-sp_gies_network))
     print(precision_score(clr_network.flatten(), sp_gies_network.flatten()))
 
-    igsp_network = pd.read_csv("./regulondb/igsp_adj.csv", header=0).to_numpy()
-    igsp_o_network = pd.read_csv("./regulondb/obs_igsp_adj.csv", header=0).to_numpy()
+    #igsp_network = pd.read_csv("./regulondb/igsp_adj.csv", header=0).to_numpy()
+    #igsp_o_network = pd.read_csv("./regulondb/obs_igsp_adj.csv", header=0).to_numpy()
     #gies_network =  pd.read_csv("./regulondb/gies-adj_mat.csv", header=0).to_numpy()
     # gies_o_network =  pd.read_csv("./regulondb/gies-o-adj_mat.csv", header=0).to_numpy()
     #pc_network = pd.read_csv("./regulondb/cupc_adj_mat.csv", header=0).to_numpy()
@@ -121,19 +121,19 @@ def test_regulondb():
     #pc_network = pc_network[inds][:,inds]
     #pc_graph = adj_to_dag(pc_network, genes)
     sp_gies_graph = adj_to_dag(sp_gies_network, genes)
-    igsp_graph = adj_to_dag(igsp_network, genes)
-    igsp_o_graph = adj_to_dag(igsp_o_network, genes)
+    #igsp_graph = adj_to_dag(igsp_network, genes)
+    #igsp_o_graph = adj_to_dag(igsp_o_network, genes)
     #gies_graph = adj_to_dag(gies_network, genes)
     # gies_o_graph = adj_to_dag(gies_o_network, genes)
 
-    get_scores([ "GSP", "IGSP-OI", "EMPTY"],
-               [igsp_o_graph, igsp_graph,
+    get_scores([ "CLR", "SP-GIES-OI", "EMPTY"],
+               [clr_graph, sp_gies_graph,
                 np.zeros((len(genes), len(genes)))], true_graph)
 
 # Evaluate the performance of algorithms on the Dream4 size 10 network 3 dataset
 def test_dream4():
     print("DREAM4")
-    for d in range(3,4):
+    for d in range(1,6):
         print("NETWORK {}".format(d))
         edges = pd.read_csv("./insilico_size10_{}/insilico_size10_{}_goldstandard.csv".format(d, d), header=0)
         df = pd.read_csv("./insilico_size10_{}/insilico_size10_{}_obs.csv".format(d, d), header=0)
@@ -250,6 +250,6 @@ def test_random_large():
     get_scores(["PC-O", "GES", "GIES-IO", "SP-GIES-IO", "IGSP-IO", "EMPTY"],
                [pc_graph, gies_o_graph, gies_graph, sp_gies_graph, igsp_graph, np.zeros((num_nodes, num_nodes))], ground_truth)
 
-#test_regulondb()
+test_regulondb()
 #test_random()
-test_dream4()
+#test_dream4()

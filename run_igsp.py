@@ -23,9 +23,8 @@ def run_regulon_db():
     for s in iv_samples_list:
         print(s.shape)
 
-    targets_list = []
-    for i in np.arange(targets.shape[0]):
-        targets_list.append(targets.iloc[i])
+    targets_list = [targets.iloc[i].dropna().tolist() for i in np.arange(targets.shape[0])]
+
     nodes=np.arange(1,data.shape[1]+1)
 
     setting_list = [dict(interventions=[t]) if type(t) !=list else dict(interventions=t) for t in targets_list]

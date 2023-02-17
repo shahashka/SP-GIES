@@ -196,7 +196,7 @@ igsp <- function(obs_data, iv_data, save_path, obs_only=FALSE) {
     intdata <- lapply(1:length(t.list), function(t) cbind(data.list[[t]], intervention_index=t) )
     inttargets <- t.list[1:length(t.list)]
     grspdag <- sp.restart.alg(suffstat, intdata, inttargets, alpha)
-    write.csv(grspdag.mat() ,row.names = FALSE, file = paste(save_path, 'igsp-adj_mat.csv',sep = ''))
+    write.csv(as.matrix(grspdag) ,row.names = FALSE, file = paste(save_path, 'igsp-adj_mat.csv',sep = ''))
 }
 
 run_from_file_igsp <- function(dataset_path, target_path, target_index_path, save_path) {

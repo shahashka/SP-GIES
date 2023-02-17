@@ -40,7 +40,7 @@ gies <- function(dataset, targets, targets.index, save_path, max_degree=integer(
     print("The total time consumed by GIES is:")
     toc()
     write.csv(result$repr$weight.mat() ,row.names = FALSE, file = paste(save_path, 'gies-adj_mat.csv',sep = ''))
-    plot(x = result$essgraph, y = "ANY")
+    # plot(x = result$essgraph, y = "ANY")
     print("test")
 }
 

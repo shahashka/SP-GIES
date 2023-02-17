@@ -18,6 +18,7 @@ def run_regulon_db():
     targets_index = pd.read_csv("./regulondb/target_index.csv", header=None)
     obs_inds = targets_index.index[targets_index.iloc[:,0]==1]
     obs_data_no_targets = data.iloc[obs_inds].to_numpy()
+    print(obs_data_no_targets)
     
     iv_samples_list = [data.iloc[targets_index.index[targets_index.iloc[:,0]==ind]].to_numpy() for ind in np.arange(1, targets.shape[0]+1)]
     for s in iv_samples_list:
@@ -37,7 +38,7 @@ def run_regulon_db():
     alpha_inv = 1e-3
     ci_tester = conditional_independence.MemoizedCI_Tester(conditional_independence.partial_correlation_test,
                                                            obs_suffstat, alpha=alpha)
-    invariance_tester = conditional_independence.MemoizedInvarianceTester(conditional_independence.gauss_invariance_suffstat,
+    invariance_tester = conditional_independence.MemoizedInvarianceTester(conditional_independence.gauss_invariance_test,
                                                                           invariance_suffstat, alpha=alpha_inv)
 
     est_dag = igsp(setting_list, nodes, ci_tester, invariance_tester)

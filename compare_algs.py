@@ -78,7 +78,9 @@ def get_scores(alg_names, networks, ground_truth):
 def test_regulondb():
     print("REGULONDB")
     true_adj = pd.read_csv("./regulondb/ground_truth.csv", header=None).values
-    print(np.allclose(true_adj, true_adj.T, rtol=1e-8, atol=1e-8))
+    true_adj = np.abs(true_adj)
+    true_adj[true_adj>1]=1
+    print(np.max(true_adj), np.min(true_adj))
     genes = [i[0] for i in pd.read_csv("./regulondb/genes.txt", header=None).values]
     true_graph = adj_to_dag(true_adj, all_nodes=genes)
 
@@ -92,7 +94,7 @@ def test_regulondb():
     true_adj[np.abs(true_adj) >0] = 1
     print(precision_score(true_adj.flatten(), clr_network.flatten()))
     
-    sp_gies_network = pd.read_csv("./regulondb/pc_sp-gies-adj_mat.csv", header=0).to_numpy()
+    sp_gies_network = pd.read_csv("./regulondb/clr_skel_trip_sp-gies-adj_mat.csv", header=0).to_numpy()
     sp_gies_network[np.abs(sp_gies_network) > 0] = 1
     print(np.sum(sp_gies_network))
     print(np.min(clr_network-sp_gies_network))

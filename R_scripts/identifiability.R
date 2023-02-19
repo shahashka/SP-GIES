@@ -39,7 +39,7 @@ for (iset in (0:10)) {
     skeleton <- read.table(paste("../random_test_set_", network, "/adj_mat_", x, ".csv", sep=""), sep=",", header=FALSE)
     skeleton <- as(skeleton,"matrix")
     #make symmetric
-    threshold=0.5
+    threshold=0.03
     skeleton[abs(skeleton) < threshold] = 0
     skeleton[abs(skeleton) >= threshold] = 1
     skeleton <- as.data.frame(skeleton)

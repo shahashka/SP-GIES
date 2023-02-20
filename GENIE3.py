@@ -4,11 +4,13 @@ from numpy import *
 import time
 from operator import itemgetter
 from multiprocessing import Pool
-
+import xgboost as xgb
 
 def compute_feature_importances(estimator):
     if isinstance(estimator, BaseDecisionTree):
         return estimator.tree_.compute_feature_importances(normalize=False)
+    elif isinstance(estimator, xgb.XGBRegressor):
+        return estimator.feature_importances_
     else:
         importances = [e.tree_.compute_feature_importances(normalize=False)
                        for e in estimator.estimators_]
@@ -226,7 +228,7 @@ def GENIE3(expr_data,gene_names=None,regulators='all',tree_method='RF',K='sqrt',
             if not sIntersection:
                 raise ValueError('the genes must contain at least one candidate regulator')        
         
-    if tree_method != 'RF' and tree_method != 'ET':
+    if tree_method != 'RF' and tree_method != 'ET' and tree_method != 'XG':
         raise ValueError('input argument tree_method must be "RF" (Random Forests) or "ET" (Extra-Trees)')
         
     if K != 'sqrt' and K != 'all' and not isinstance(K,int): 
@@ -320,11 +322,14 @@ def GENIE3_single(expr_data,output_idx,input_idx,tree_method,K,ntrees):
         max_features = "auto"
     else:
         max_features = K
-    
-    if tree_method == 'RF':
+
+    if tree_method=='XG':
+        treeEstimator = xgb.XGBRegressor(n_estimators=ntrees)
+    elif tree_method == 'RF':
         treeEstimator = RandomForestRegressor(n_estimators=ntrees,max_features=max_features)
     elif tree_method == 'ET':
         treeEstimator = ExtraTreesRegressor(n_estimators=ntrees,max_features=max_features)
+
 
     # Learn ensemble of trees
     treeEstimator.fit(expr_data_input,output)

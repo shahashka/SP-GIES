@@ -24,9 +24,10 @@ run_from_file_sp_gies <- function(dataset_path, target_path, target_index_path, 
     if (is.character(skeleton_path)) {
         skeleton <- read.table(skeleton_path, sep=",", header=FALSE)
         skeleton <- as(skeleton,"matrix")
+
         skeleton[abs(skeleton) < threshold] = 0
-	skeleton[abs(skeleton) >= threshold] = 1
-	skeleton <- as.data.frame(skeleton)
+	    skeleton[abs(skeleton) >= threshold] = 1
+	    skeleton <- as.data.frame(skeleton)
         skeleton <- skeleton == 0
         class(skeleton) <- "logical"
 	sp_gies_from_skeleton(dataset, targets, targets.index, skeleton, save_path, save_pc)

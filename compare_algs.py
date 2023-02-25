@@ -73,7 +73,21 @@ def get_scores(alg_names, networks, ground_truth):
             auc, pr = cdt.metrics.precision_recall(ground_truth, net)
             print("{} {} {} {}".format(name, shd, sid, auc))
 
-
+def test_regulondb_subnetwork():
+    print("REGULONDB_SUB")
+    true_adj = pd.read_csv("./regulondb/ground_skel_subgraph.csv", header=None).values
+    true_adj = np.abs(true_adj)
+    true_adj[true_adj>1]=1
+    clr_network = pd.read_csv("./regulondb/clr_skel_subgraph.csv", header=None).to_numpy()
+    sp_gies_network = pd.read_csv("./regulondb/subgraph_sp-gies-adj_mat.csv", header=0).to_numpy()
+    sp_gies_network[np.abs(sp_gies_network) > 0] = 1
+    genes = [i[0] for i in pd.read_csv("./regulondb/genes.txt", header=None).values]
+    clr_graph = adj_to_dag(clr_network,genes)
+    sp_gies_graph = adj_to_dag(sp_gies_network,genes)
+    true_graph = adj_to_dag(true_adj, genes)
+    get_scores(["CLR", "SP-GIES-OI", "EMPTY"],
+               [clr_graph, sp_gies_graph,
+                np.zeros((len(genes), len(genes)))], true_graph)
 # Evaluate the performance of algorithms on the regulondb dataset
 def test_regulondb():
     print("REGULONDB")
@@ -94,7 +108,7 @@ def test_regulondb():
     true_adj[np.abs(true_adj) >0] = 1
     print(precision_score(true_adj.flatten(), clr_network.flatten()))
     
-    sp_gies_network = pd.read_csv("./regulondb/clr_skel_trip_sp-gies-adj_mat.csv", header=0).to_numpy()
+    sp_gies_network = pd.read_csv("./regulondb/skel_sp-gies-adj_mat.csv", header=0).to_numpy()
     sp_gies_network[np.abs(sp_gies_network) > 0] = 1
     print(np.sum(sp_gies_network))
     print(np.min(clr_network-sp_gies_network))
@@ -128,8 +142,8 @@ def test_regulondb():
     #gies_graph = adj_to_dag(gies_network, genes)
     # gies_o_graph = adj_to_dag(gies_o_network, genes)
 
-    get_scores([ "CLR", "SP-GIES-OI", "EMPTY"],
-               [clr_graph, sp_gies_graph,
+    get_scores([ "SP-GIES-OI", "EMPTY"],
+               [sp_gies_graph,
                 np.zeros((len(genes), len(genes)))], true_graph)
 
 # Evaluate the performance of algorithms on the Dream4 size 10 network 3 dataset
@@ -252,6 +266,7 @@ def test_random_large():
     get_scores(["PC-O", "GES", "GIES-IO", "SP-GIES-IO", "IGSP-IO", "EMPTY"],
                [pc_graph, gies_o_graph, gies_graph, sp_gies_graph, igsp_graph, np.zeros((num_nodes, num_nodes))], ground_truth)
 
-test_regulondb()
+#test_regulondb()
 #test_random()
 #test_dream4()
+test_regulondb_subnetwork()

@@ -32,9 +32,10 @@ python convert_dream4 -d insilico_size10_3
 ```
 
 ### Run
-To generate estimated graphs for each dataset (and for examples on how to run structure learners), from```SP-GIES/``` folder run 
+To generate estimated graphs for each dataset (and for examples on how to run structure learners), use any of the 
+```run_``` scripts in the ```R_scripts/``` e.g.
 ```
-Rscript run_all_datasets.R
+Rscript run_dream4.R
 ```
 To replicate results from the paper run the following to get scores for GIES and SP-GIES on each dataset
 ```

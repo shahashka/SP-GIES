@@ -15,7 +15,7 @@ font = {'family' : 'normal',
 import matplotlib
 matplotlib.rc('font', **font)
 
-# Script to compare PC, GIES-O (observational only), GIES-IO (observational + interventional joint), and SP-GIES-IO algorhtms
+# Script to compare PC, GES-O (observational only), GIES-IO (observational + interventional joint), and SP-GIES-IO algorhtms
 # on random, dream4 and regulondb datasets
 
 # Helper function to convert an adjacency matrix into a Networkx Digraph
@@ -84,9 +84,9 @@ def test_regulondb():
     aracne_network = pd.read_csv("./regulondb/network.txt", sep='\t',header=0)
     clr_network = pd.read_csv("./regulondb/adj_mat.csv", header=None).to_numpy()
     sp_gies_network = pd.read_csv("./regulondb/sp-gies-adj_mat.csv", header=0).to_numpy()
-    #gies_network =  pd.read_csv("./regulondb/gies-adj_mat.csv", header=0).to_numpy()
-    # gies_o_network =  pd.read_csv("./regulondb/gies-o-adj_mat.csv", header=0).to_numpy()
-    #pc_network = pd.read_csv("./regulondb/cupc_adj_mat.csv", header=0).to_numpy()
+    gies_network =  pd.read_csv("./regulondb/gies-adj_mat.csv", header=0).to_numpy()
+    gies_o_network =  pd.read_csv("./regulondb/obs_gies-adj_mat.csv", header=0).to_numpy()
+    pc_network = pd.read_csv("./regulondb/cupc_adj_mat.csv", header=0).to_numpy()
 
     inds = pd.read_csv("./regulondb/inds.csv", header=None, sep=",").iloc[0].values
 
@@ -104,13 +104,13 @@ def test_regulondb():
     clr_network[clr_network < threshold] = 0
     clr_graph = adj_to_dag(clr_network,genes)
 
-    #pc_network = pc_network[inds][:,inds]
-    #pc_graph = adj_to_dag(pc_network, genes)
+    pc_network = pc_network[inds][:,inds]
+    pc_graph = adj_to_dag(pc_network, genes)
     sp_gies_graph = adj_to_dag(sp_gies_network, genes)
-    #gies_graph = adj_to_dag(gies_network, genes)
-    # gies_o_graph = adj_to_dag(gies_o_network, genes)
+    gies_graph = adj_to_dag(gies_network, genes)
+    gies_o_graph = adj_to_dag(gies_o_network, genes)
 
-    get_scores(["ARACNE-AP", "CLR",  "SP-GIES-OI", "EMPTY"],
+    get_scores(["ARACNE-AP", "CLR",  "SP-GIES-OI", "NULL"],
                [aracne_graph, clr_graph, sp_gies_graph,
                 np.zeros((len(genes), len(genes)))], true_graph)
 
@@ -138,8 +138,8 @@ def test_dream4():
     gies_graph = adj_to_dag(gies_network, nodes)
     gies_o_graph = adj_to_dag(gies_o_network, nodes)
 
-    get_scores(["PC-O", "GIES-O", "GIES-OI","SP-GIES-OI", "COMPLETE"],
-               [pc_graph, gies_o_graph, gies_graph, sp_gies_graph, np.ones((len(nodes), len(nodes)))], true_graph)
+    get_scores(["PC-O", "GES-O", "GIES-OI","SP-GIES-OI", "NULL"],
+               [pc_graph, gies_o_graph, gies_graph, sp_gies_graph, np.zeros((len(nodes), len(nodes)))], true_graph)
 
 # Evaluate the performance of algorithms on the random datasets of size 10 nodes(Erdos Renyi, scale-free, and small-world)
 # Average over 30 generated graphs for each network type
@@ -181,10 +181,10 @@ def test_random():
             gies_o.append(gies_o_graph)
             ground_truth.append(true_graph)
 
-        get_scores(["PC-O", "GIES-O", "GIES-IO", "SP-GIES-IO","EMPTY"],
+        get_scores(["PC-O", "GES-O", "GIES-IO", "SP-GIES-IO","NULL"],
                    [pc, gies_o, gies, sp_gies, np.zeros((num_nodes, num_nodes))], ground_truth)
 
 
-#test_regulondb()
-#test_random()
+test_regulondb()
+test_random()
 test_dream4()

@@ -20,10 +20,11 @@ def get_args():
     parser.add_argument('--working_dir', type=str)
     parser.add_argument('--num_graphs',type=int)
     parser.add_argument('--normalize', action='store_true',default=False )
+    parser.add_argument('--ivnodes', type=int, default=None)
     return parser.parse_args()
 
 # Create a random gaussian DAG and correposning observational dataset. Assume no prior information
-def get_random_graph_data(working_dir, graph_type, nsamples, n, parameters, toNormalize=False, seed=None, num_graphs=1):
+def get_random_graph_data(working_dir, graph_type, nsamples, n, parameters, toNormalize=False, seed=None, num_graphs=1,ivnodes=None):
     if graph_type == 'erdos_renyi':
         random_graph_model = lambda nnodes: nx.erdos_renyi_graph(nnodes, p=parameters["p"], seed=seed)
     elif graph_type == 'scale_free':
@@ -64,10 +65,12 @@ def get_random_graph_data(working_dir, graph_type, nsamples, n, parameters, toNo
         df_params.to_csv('{}/bn_params_{}.csv'.format(working_dir,g), index=False)
 
         i_data = []
-        for i in nodes_inds:
+        if ivnodes:
+            nodes_inds = np.random.choice(nodes_inds, size=ivnodes, replace=False)
+        for ind,i in enumerate(nodes_inds):
             samples = bn.sample_interventional(cd.Intervention({i: cd.ConstantIntervention(val=0)}), 1)
             samples = pd.DataFrame(samples, columns=nodes)
-            samples['target'] = i+1
+            samples['target'] = ind+1
             i_data.append(samples)
         df_int = pd.concat(i_data)
         df_int.to_csv("{}/interventional_data_{}.csv".format(working_dir, g), index=False)
@@ -77,4 +80,4 @@ def get_random_graph_data(working_dir, graph_type, nsamples, n, parameters, toNo
 
 args = get_args()
 get_random_graph_data(args.working_dir, args.random_graph, nsamples=args.nsamples, n=args.nnodes,
-                      parameters={"p":args.p, "k":args.k}, toNormalize=args.normalize, seed=args.seed, num_graphs=args.num_graphs)
+                      parameters={"p":args.p, "k":args.k}, toNormalize=args.normalize, seed=args.seed, num_graphs=args.num_graphs, ivnodes=args.ivnodes)

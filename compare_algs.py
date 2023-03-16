@@ -47,7 +47,7 @@ def edge_to_dag(edges):
 
 # Helper function to print the SHD, SID, AUC for a set of algorithms and networks
 # Also handles averaging over several sets of networks (e.g the random comparison averages over 30 different generated graphs)
-def get_scores(alg_names, networks, ground_truth):
+def get_scores(alg_names, networks, ground_truth, sid=True):
     for name, net in zip(alg_names, networks):
         if type(net) == list and type(ground_truth) == list:
             shd = 0
@@ -55,7 +55,7 @@ def get_scores(alg_names, networks, ground_truth):
             auc = 0
             for n,g in zip(net, ground_truth):
                 shd += cdt.metrics.SHD(g, n, False)
-                sid +=cdt.metrics.SID(g, n)
+                sid += cdt.metrics.SID(g, n) if sid else 0
                 auc +=  cdt.metrics.precision_recall(g, n)[0]
             print("{} {} {} {}".format(name, shd/len(net), sid/len(net), auc/len(net)))
         elif type(net) != list and type(ground_truth) == list:
@@ -64,31 +64,47 @@ def get_scores(alg_names, networks, ground_truth):
             auc = 0
             for g in ground_truth:
                 shd += cdt.metrics.SHD(g, net, False)
-                sid +=cdt.metrics.SID(g, net)
+                sid += cdt.metrics.SID(g, net) if sid else 0
                 auc +=  cdt.metrics.precision_recall(g, net)[0]
             print("{} {} {} {}".format(name, shd/len(ground_truth), sid/len(ground_truth), auc/len(ground_truth)))
         else:
             shd = cdt.metrics.SHD(ground_truth, net, False)
-            sid = cdt.metrics.SID(ground_truth, net)
+            sid = cdt.metrics.SID(ground_truth, net) if sid else 0
             auc, pr = cdt.metrics.precision_recall(ground_truth, net)
             print("{} {} {} {}".format(name, shd, sid, auc))
 
 def test_regulondb_subnetwork():
     print("REGULONDB_SUB")
-    true_adj = pd.read_csv("./regulondb/ground_skel_subgraph.csv", header=None).values
+    true_adj = pd.read_csv("./regulondb/ground_skel_subgraph_local.csv", header=None).values
     true_adj = np.abs(true_adj)
     true_adj[true_adj>1]=1
-    clr_network = pd.read_csv("./regulondb/clr_skel_subgraph.csv", header=None).to_numpy()
-    sp_gies_network = pd.read_csv("./regulondb/subgraph_sp-gies-adj_mat.csv", header=0).to_numpy()
-    sp_gies_network[np.abs(sp_gies_network) > 0] = 1
+    np.fill_diagonal(true_adj, 0)
+    
+    clr_network = pd.read_csv("./regulondb/clr_skel_subgraph_local.csv", header=None).to_numpy()
+    #sp_gies_network_realdata = pd.read_csv("./regulondb/subgraph_sp-gies-adj_mat.csv", header=0).to_numpy()
+    #sp_gies_network_realdata[np.abs(sp_gies_network_realdata) > 0] = 1
+    
+    sp_gies_network = pd.read_csv("./regulondb/clr_skel_subgraph_local_sp-gies-adj_mat.csv", header=0).to_numpy()
+    #sp_gies_network[np.abs(sp_gies_network) > 0] = 1
+
+    sp_gies_network_int = pd.read_csv("./regulondb/clr_skel_subgraph_local_wint_sp-gies-adj_mat.csv", header=0).to_numpy()
+    #sp_gies_network_pc[np.abs(sp_gies_network_pc) > 0] = 1
+
+    gies_network = pd.read_csv("./regulondb/subgraph_local_gies-adj_mat.csv", header=0).to_numpy()
     genes = [i[0] for i in pd.read_csv("./regulondb/genes.txt", header=None).values]
     clr_graph = adj_to_dag(clr_network,genes)
     sp_gies_graph = adj_to_dag(sp_gies_network,genes)
+    sp_gies_graph_int = adj_to_dag(sp_gies_network_int,genes)
+    gies_graph  = adj_to_dag(gies_network, genes)
+    #sp_gies_graph_real = adj_to_dag(sp_gies_network_realdata, genes)
+    
     true_graph = adj_to_dag(true_adj, genes)
-    get_scores(["CLR", "SP-GIES-OI", "EMPTY"],
-               [clr_graph, sp_gies_graph,
-                np.zeros((len(genes), len(genes)))], true_graph)
-# Evaluate the performance of algorithms on the regulondb dataset
+    get_scores(["CLR", "SP-GIES-CLR-SKEL","SP-GIES-CLR-SKEL-INT", "EMPTY"],
+               [clr_graph,sp_gies_graph,sp_gies_graph_int,
+                np.zeros((len(genes), len(genes)))], true_graph, sid=False)
+
+
+    # Evaluate the performance of algorithms on the regulondb dataset
 def test_regulondb():
     print("REGULONDB")
     true_adj = pd.read_csv("./regulondb/ground_truth.csv", header=None).values
@@ -108,17 +124,23 @@ def test_regulondb():
     true_adj[np.abs(true_adj) >0] = 1
     print(precision_score(true_adj.flatten(), clr_network.flatten()))
     
-    sp_gies_network = pd.read_csv("./regulondb/skel_sp-gies-adj_mat.csv", header=0).to_numpy()
-    sp_gies_network[np.abs(sp_gies_network) > 0] = 1
-    print(np.sum(sp_gies_network))
-    print(np.min(clr_network-sp_gies_network))
-    print(precision_score(clr_network.flatten(), sp_gies_network.flatten()))
-
+    sp_gies_network_pc = pd.read_csv("./regulondb/pc_skel_sp-gies-adj_mat.csv", header=0).to_numpy()
+    sp_gies_network_pc[np.abs(sp_gies_network_pc) > 0] = 1
+    print(np.sum(sp_gies_network_pc))
+    
+    sp_gies_network_clr = pd.read_csv("./regulondb/clr_skel_sp-gies-adj_mat.csv", header=0).to_numpy()
+    sp_gies_network_clr[np.abs(sp_gies_network_clr) > 0] = 1
+    print(np.sum(sp_gies_network_clr))
+          
+    sp_gies_network_aracne = pd.read_csv("./regulondb/aracne_skel_sp-gies-adj_mat.csv", header=0).to_numpy()
+    sp_gies_network_aracne[np.abs(sp_gies_network_aracne) > 0] = 1
+    print(np.sum(sp_gies_network_aracne))
+    
     #igsp_network = pd.read_csv("./regulondb/igsp_adj.csv", header=0).to_numpy()
     #igsp_o_network = pd.read_csv("./regulondb/obs_igsp_adj.csv", header=0).to_numpy()
     #gies_network =  pd.read_csv("./regulondb/gies-adj_mat.csv", header=0).to_numpy()
     # gies_o_network =  pd.read_csv("./regulondb/gies-o-adj_mat.csv", header=0).to_numpy()
-    #pc_network = pd.read_csv("./regulondb/cupc_adj_mat.csv", header=0).to_numpy()
+    pc_network = pd.read_csv("./regulondb/cupc-adj_mat.csv", header=0).to_numpy()
 
     inds = pd.read_csv("./regulondb/inds.csv", header=None, sep=",").iloc[0].values
 
@@ -135,15 +157,18 @@ def test_regulondb():
     clr_graph = adj_to_dag(clr_network,genes)
 
     #pc_network = pc_network[inds][:,inds]
-    #pc_graph = adj_to_dag(pc_network, genes)
-    sp_gies_graph = adj_to_dag(sp_gies_network, genes)
+    pc_graph = adj_to_dag(pc_network, genes)
+    sp_gies_graph_pc = adj_to_dag(sp_gies_network_pc, genes)
+    sp_gies_graph_aracne = adj_to_dag(sp_gies_network_aracne, genes)
+    sp_gies_graph_clr = adj_to_dag(sp_gies_network_clr, genes)
+
     #igsp_graph = adj_to_dag(igsp_network, genes)
     #igsp_o_graph = adj_to_dag(igsp_o_network, genes)
     #gies_graph = adj_to_dag(gies_network, genes)
     # gies_o_graph = adj_to_dag(gies_o_network, genes)
 
-    get_scores([ "SP-GIES-OI", "EMPTY"],
-               [sp_gies_graph,
+    get_scores([ "PC", "ARACNE", "SP-GIES-PC","SP-GIES-CLR", "SP-GIES-ARACNE", "EMPTY"],
+               [pc_graph, aracne_graph, sp_gies_graph_pc, sp_gies_graph_clr, sp_gies_graph_aracne,
                 np.zeros((len(genes), len(genes)))], true_graph)
 
 # Evaluate the performance of algorithms on the Dream4 size 10 network 3 dataset
@@ -235,10 +260,11 @@ def test_random():
                    [pc, gies_o, gies, sp_gies,igsp, np.zeros((num_nodes, num_nodes))], ground_truth)
 
 def test_random_large():
-    num_nodes = 1000
-    random = ["small_norm"]
-    edges = pd.read_csv( "./random_test_set_{}_{}/bn_network_{}.csv".format(num_nodes,r, n), header=0)
-    df = pd.read_csv("./random_test_set_{}_{}/data_{}.csv".format(num_nodes,r,n), header=0)
+    n = 0
+    num_nodes=1000
+    folder = "./random_test_set_fewer_1000_500n_scale"
+    edges = pd.read_csv( "{}/bn_network_{}.csv".format(folder, n), header=0)
+    df = pd.read_csv("{}/data_{}.csv".format(folder,n), header=0)
 
     edges_pos = [(r['start'], r['end']) for i, r in edges.iterrows() if r['edge'] == 1]
     true_graph = edge_to_dag(edges_pos)
@@ -247,26 +273,25 @@ def test_random_large():
     true_graph.add_nodes_from(nodes)
     df = df.drop('target', axis=1)
     n=0
-    aracne_network = pd.read_csv("./random_test_set_{}_{}/network.txt".format(num_nodes,random), sep='\t', header=0)
-    clr_network = pd.read_csv("./random_test_set_{}_{}/adj_mat.csv".format(num_nodes, random), header=None).to_numpy()
-    sp_gies_network = pd.read_csv("./random_test_set_{}_{}/{}_sp-gies-adj_mat.csv".format(num_nodes,random,n), header=0).to_numpy()
-    gies_network =  pd.read_csv("./random_test_set_{}_{}/{}_gies-adj_mat.csv".format(num_nodes,random,n), header=0).to_numpy()
-    gies_o_network = pd.read_csv("./random_test_set_{}_{}/obs_{}_gies-adj_mat.csv".format(num_nodes,random, n), header=0).to_numpy()
-    pc_network = pd.read_csv("./random_test_set_{}_{}/obs_{}_cupc-adj_mat.csv".format(num_nodes,random, n), header=0).to_numpy()
-    igsp_network = pd.read_csv("./random_test_set_{}_{}/igsp_{}_adj.csv".format(num_nodes,random, n), header=None).to_numpy()
+    sp_gies_network = pd.read_csv("{}/{}_sp-gies-adj_mat.csv".format(folder,n), header=0).to_numpy()
+    gies_network =  pd.read_csv("{}/{}_gies-adj_mat.csv".format(folder,n), header=0).to_numpy()
+    gies_o_network = pd.read_csv("{}/obs_{}_gies-adj_mat.csv".format(folder, n), header=0).to_numpy()
+    pc_network = pd.read_csv("{}/{}_cupc-adj_mat.csv".format(folder, n), header=0).to_numpy()
+    #igsp_network = pd.read_csv("./random_test_set_{}_{}/igsp_{}_adj.csv".format(num_nodes,random, n), header=None).to_numpy()
     #igsp_o_network = pd.read_csv("./random_test_set_{}_{}/obs_igsp_{}_adj.csv".format(num_nodes,random, n), header=None).to_numpy()
 
     sp_gies_graph = adj_to_dag(sp_gies_network, nodes)
     gies_graph = adj_to_dag(gies_network, nodes)
     pc_graph = adj_to_dag(pc_network, nodes)
     gies_o_graph = adj_to_dag(gies_o_network, nodes)
-    igsp_graph = adj_to_dag(igsp_network, nodes)
+    #igsp_graph = adj_to_dag(igsp_network, nodes)
     #igsp_o_graph = adj_to_dag(igsp_o_network, nodes)
 
-    get_scores(["PC-O", "GES", "GIES-IO", "SP-GIES-IO", "IGSP-IO", "EMPTY"],
-               [pc_graph, gies_o_graph, gies_graph, sp_gies_graph, igsp_graph, np.zeros((num_nodes, num_nodes))], ground_truth)
+    get_scores(["PC-O", "GES", "GIES-IO", "SP-GIES-IO", "EMPTY"],
+               [pc_graph, gies_o_graph, gies_graph, sp_gies_graph,  np.zeros((num_nodes, num_nodes))], true_graph)
 
 #test_regulondb()
 #test_random()
 #test_dream4()
 test_regulondb_subnetwork()
+#test_random_large()

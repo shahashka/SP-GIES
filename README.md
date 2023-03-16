@@ -13,7 +13,7 @@ To use the cupc and CDT submodules, initialize after cloning and compile:
 ```
 git submodule init
 git submodule update
-nvcc -O3 --shared -Xcompiler -fPIC -o SP-GIES/Skeleton.so cupc/cuPC-S.cu
+nvcc -O3 --shared -Xcompiler -fPIC -o R_scripts/Skeleton.so cupc/cuPC-S.cu
 pip install ./CausalDiscoveryToolbox
 ```
 To install relevant R packages use the installation script in R:

@@ -55,7 +55,7 @@ def get_scores(alg_names, networks, ground_truth):
             auc = 0
             for n,g in zip(net, ground_truth):
                 shd += cdt.metrics.SHD(g, n, False)
-                sid +=cdt.metrics.SID(g, n)
+                sid += 0# cdt.metrics.SID(g, n)
                 auc +=  cdt.metrics.precision_recall(g, n)[0]
             print("{} {} {} {}".format(name, shd/len(net), sid/len(net), auc/len(net)))
         elif type(net) != list and type(ground_truth) == list:
@@ -64,12 +64,12 @@ def get_scores(alg_names, networks, ground_truth):
             auc = 0
             for g in ground_truth:
                 shd += cdt.metrics.SHD(g, net, False)
-                sid +=cdt.metrics.SID(g, net)
+                sid += 0 #cdt.metrics.SID(g, net)
                 auc +=  cdt.metrics.precision_recall(g, net)[0]
             print("{} {} {} {}".format(name, shd/len(ground_truth), sid/len(ground_truth), auc/len(ground_truth)))
         else:
             shd = cdt.metrics.SHD(ground_truth, net, False)
-            sid = cdt.metrics.SID(ground_truth, net)
+            sid = 0 #cdt.metrics.SID(ground_truth, net)
             auc, pr = cdt.metrics.precision_recall(ground_truth, net)
             print("{} {} {} {}".format(name, shd, sid, auc))
 
@@ -77,14 +77,14 @@ def test_regulondb_subnetwork():
     print("REGULONDB_SUB")
     true_adj = pd.read_csv("./regulondb/ground_skel_subgraph.csv", header=None).values
     true_adj = np.abs(true_adj)
-    true_adj[true_adj>1]=1
+    np.fill_diagonal(true_adj, 0)
     clr_network = pd.read_csv("./regulondb/clr_skel_subgraph.csv", header=None).to_numpy()
     sp_gies_network = pd.read_csv("./regulondb/subgraph_sp-gies-adj_mat.csv", header=0).to_numpy()
     sp_gies_network[np.abs(sp_gies_network) > 0] = 1
-    genes = [i[0] for i in pd.read_csv("./regulondb/genes.txt", header=None).values]
-    clr_graph = adj_to_dag(clr_network,genes)
-    sp_gies_graph = adj_to_dag(sp_gies_network,genes)
-    true_graph = adj_to_dag(true_adj, genes)
+    genes =np.arange(true_adj.shape[0])
+    clr_graph = adj_to_dag(clr_network, genes)
+    sp_gies_graph = adj_to_dag(sp_gies_network, genes)
+    true_graph = adj_to_dag(true_adj, np.arange(true_adj.shape[1]))
     get_scores(["CLR", "SP-GIES-OI", "EMPTY"],
                [clr_graph, sp_gies_graph,
                 np.zeros((len(genes), len(genes)))], true_graph)

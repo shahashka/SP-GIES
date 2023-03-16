@@ -64,7 +64,7 @@ def get_scores(alg_names, networks, ground_truth, sid=True):
             auc = 0
             for g in ground_truth:
                 shd += cdt.metrics.SHD(g, net, False)
-                sid += cdt.metrics.SID(g, net) if sid else 0
+                sid += 0 #cdt.metrics.SID(g, net)
                 auc +=  cdt.metrics.precision_recall(g, net)[0]
             print("{} {} {} {}".format(name, shd/len(ground_truth), sid/len(ground_truth), auc/len(ground_truth)))
         else:
@@ -77,34 +77,18 @@ def test_regulondb_subnetwork():
     print("REGULONDB_SUB")
     true_adj = pd.read_csv("./regulondb/ground_skel_subgraph_local.csv", header=None).values
     true_adj = np.abs(true_adj)
-    true_adj[true_adj>1]=1
     np.fill_diagonal(true_adj, 0)
-    
-    clr_network = pd.read_csv("./regulondb/clr_skel_subgraph_local.csv", header=None).to_numpy()
-    #sp_gies_network_realdata = pd.read_csv("./regulondb/subgraph_sp-gies-adj_mat.csv", header=0).to_numpy()
-    #sp_gies_network_realdata[np.abs(sp_gies_network_realdata) > 0] = 1
-    
-    sp_gies_network = pd.read_csv("./regulondb/clr_skel_subgraph_local_sp-gies-adj_mat.csv", header=0).to_numpy()
-    #sp_gies_network[np.abs(sp_gies_network) > 0] = 1
-
-    sp_gies_network_int = pd.read_csv("./regulondb/clr_skel_subgraph_local_wint_sp-gies-adj_mat.csv", header=0).to_numpy()
-    #sp_gies_network_pc[np.abs(sp_gies_network_pc) > 0] = 1
-
-    gies_network = pd.read_csv("./regulondb/subgraph_local_gies-adj_mat.csv", header=0).to_numpy()
-    genes = [i[0] for i in pd.read_csv("./regulondb/genes.txt", header=None).values]
-    clr_graph = adj_to_dag(clr_network,genes)
-    sp_gies_graph = adj_to_dag(sp_gies_network,genes)
-    sp_gies_graph_int = adj_to_dag(sp_gies_network_int,genes)
-    gies_graph  = adj_to_dag(gies_network, genes)
-    #sp_gies_graph_real = adj_to_dag(sp_gies_network_realdata, genes)
-    
-    true_graph = adj_to_dag(true_adj, genes)
-    get_scores(["CLR", "SP-GIES-CLR-SKEL","SP-GIES-CLR-SKEL-INT", "EMPTY"],
-               [clr_graph,sp_gies_graph,sp_gies_graph_int,
-                np.zeros((len(genes), len(genes)))], true_graph, sid=False)
-
-
-    # Evaluate the performance of algorithms on the regulondb dataset
+    clr_network = pd.read_csv("./regulondb/clr_skel_subgraph.csv", header=None).to_numpy()
+    sp_gies_network = pd.read_csv("./regulondb/subgraph_sp-gies-adj_mat.csv", header=0).to_numpy()
+    sp_gies_network[np.abs(sp_gies_network) > 0] = 1
+    genes =np.arange(true_adj.shape[0])
+    clr_graph = adj_to_dag(clr_network, genes)
+    sp_gies_graph = adj_to_dag(sp_gies_network, genes)
+    true_graph = adj_to_dag(true_adj, np.arange(true_adj.shape[1]))
+    get_scores(["CLR", "SP-GIES-OI", "EMPTY"],
+               [clr_graph, sp_gies_graph,
+                np.zeros((len(genes), len(genes)))], true_graph)
+# Evaluate the performance of algorithms on the regulondb dataset
 def test_regulondb():
     print("REGULONDB")
     true_adj = pd.read_csv("./regulondb/ground_truth.csv", header=None).values

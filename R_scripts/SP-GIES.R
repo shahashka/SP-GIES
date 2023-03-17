@@ -76,7 +76,6 @@ sp_gies <- function(dataset, targets, targets.index, save_path, save_pc=FALSE, m
     toc()
     print(max(degree(graph_from_adjacency_matrix(result$repr$weight.mat(), weighted=TRUE))))
     write.csv(result$repr$weight.mat() ,row.names = FALSE, file = paste(save_path, 'sp-gies-adj_mat.csv',sep = ''))
-    return(result)
  }
 
 # Same method as above, except skeleton comes from another algorithm. fixedGaps is a logical array that

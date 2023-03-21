@@ -3,7 +3,7 @@ source("GIES.R")
 source("SP-GIES.R")
 
 # Load RegulonDB data
-dataset_path <- file.path("../regulondb/data_smaller.csv", fsep=.Platform$file.sep)
+dataset_path <- file.path("../regulondb/data_smaller_w_header.csv", fsep=.Platform$file.sep)
 target_path <- file.path("../regulondb/targets.csv", fsep=.Platform$file.sep)
 target_index_path <- file.path("../regulondb/target_index.csv", fsep=.Platform$file.sep)
 

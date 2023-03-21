@@ -9,7 +9,7 @@ library(igraph)
 # The targets index file should contain a list of size # of samples. Each value corresponds to the index of the target list
 # See pcalg::gies documentation for more (https://rdrr.io/cran/pcalg/man/gies.html)
 run_from_file_gies <- function(dataset_path, target_path, target_index_path, save_path, max_degree=integer(0)) {
-    dataset <- read.table(dataset_path, sep=",", header=FALSE)
+    dataset <- read.table(dataset_path, sep=",", header=TRUE)
     print(dim(dataset))
 
     if (is.null(target_path)){

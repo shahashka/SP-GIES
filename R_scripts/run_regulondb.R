@@ -10,7 +10,10 @@ target_index_path <- file.path("../regulondb/target_index.csv", fsep=.Platform$f
 # Threshold selected from CLR paper to ensure 60% precision in CLR skeleton
 # SP-GIES-OI
 run_from_file_sp_gies(dataset_path, target_path, target_index_path, threshold=6.917,
-skeleton_path="../regulondb/adj_mat.csv", save_path="../regulondb/clr_skel_", save_pc=TRUE)
+skeleton_path="../regulondb/adj_mat.csv", save_path="../regulondb/clr_skel_")
+
+run_from_file_sp_gies(dataset_path, target_path, target_index_path, save_path="../regulondb/", save_pc=TRUE)
+
 # GIES-OI
 run_from_file_gies(dataset_path, target_path, target_index_path, save_path="../regulondb/md_10_", max_degree=10)
 # GES-O

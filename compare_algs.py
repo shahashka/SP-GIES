@@ -47,7 +47,7 @@ def edge_to_dag(edges):
 
 # Helper function to print the SHD, SID, AUC for a set of algorithms and networks
 # Also handles averaging over several sets of networks (e.g the random comparison averages over 30 different generated graphs)
-def get_scores(alg_names, networks, ground_truth):
+def get_scores(alg_names, networks, ground_truth, get_sid=False):
     for name, net in zip(alg_names, networks):
         if type(net) == list and type(ground_truth) == list:
             shd = 0
@@ -55,7 +55,7 @@ def get_scores(alg_names, networks, ground_truth):
             auc = 0
             for n,g in zip(net, ground_truth):
                 shd += cdt.metrics.SHD(g, n, False)
-                sid +=cdt.metrics.SID(g, n)
+                sid += cdt.metrics.SID(g, n) if get_sid else 0
                 auc +=  cdt.metrics.precision_recall(g, n)[0]
             print("{} {} {} {}".format(name, shd/len(net), sid/len(net), auc/len(net)))
         elif type(net) != list and type(ground_truth) == list:
@@ -64,12 +64,12 @@ def get_scores(alg_names, networks, ground_truth):
             auc = 0
             for g in ground_truth:
                 shd += cdt.metrics.SHD(g, net, False)
-                sid +=cdt.metrics.SID(g, net)
+                sid +=cdt.metrics.SID(g, net) if get_sid else 0
                 auc +=  cdt.metrics.precision_recall(g, net)[0]
             print("{} {} {} {}".format(name, shd/len(ground_truth), sid/len(ground_truth), auc/len(ground_truth)))
         else:
             shd = cdt.metrics.SHD(ground_truth, net, False)
-            sid = cdt.metrics.SID(ground_truth, net)
+            sid = cdt.metrics.SID(ground_truth, net) if get_sid else 0
             auc, pr = cdt.metrics.precision_recall(ground_truth, net)
             print("{} {} {} {}".format(name, shd, sid, auc))
 
@@ -83,12 +83,10 @@ def test_regulondb():
 
     aracne_network = pd.read_csv("./regulondb/network.txt", sep='\t',header=0)
     clr_network = pd.read_csv("./regulondb/adj_mat.csv", header=None).to_numpy()
-    sp_gies_network = pd.read_csv("./regulondb/sp-gies-adj_mat.csv", header=0).to_numpy()
-    gies_network =  pd.read_csv("./regulondb/gies-adj_mat.csv", header=0).to_numpy()
+    sp_gies_network = pd.read_csv("./regulondb/clr_skel_sp-gies-adj_mat.csv", header=0).to_numpy()
+    gies_network =  pd.read_csv("./regulondb/md_10_gies-adj_mat.csv", header=0).to_numpy()
     gies_o_network =  pd.read_csv("./regulondb/obs_gies-adj_mat.csv", header=0).to_numpy()
-    pc_network = pd.read_csv("./regulondb/cupc_adj_mat.csv", header=0).to_numpy()
-
-    inds = pd.read_csv("./regulondb/inds.csv", header=None, sep=",").iloc[0].values
+    pc_network = pd.read_csv("./regulondb/cupc-adj_mat.csv", header=0).to_numpy()
 
     #  zero out gene->gene and gene-> tf interactions
     with open('./regulondb/tfs.txt') as f:
@@ -104,14 +102,13 @@ def test_regulondb():
     clr_network[clr_network < threshold] = 0
     clr_graph = adj_to_dag(clr_network,genes)
 
-    pc_network = pc_network[inds][:,inds]
     pc_graph = adj_to_dag(pc_network, genes)
     sp_gies_graph = adj_to_dag(sp_gies_network, genes)
     gies_graph = adj_to_dag(gies_network, genes)
     gies_o_graph = adj_to_dag(gies_o_network, genes)
 
-    get_scores(["ARACNE-AP", "CLR",  "SP-GIES-OI", "NULL"],
-               [aracne_graph, clr_graph, sp_gies_graph,
+    get_scores(["ARACNE-AP", "CLR",  "SP-GIES-OI", "GIES-OI", "GES-O", "NULL"],
+               [aracne_graph, clr_graph, sp_gies_graph, gies_graph, gies_o_graph, 
                 np.zeros((len(genes), len(genes)))], true_graph)
 
 # Evaluate the performance of algorithms on the Dream4 size 10 network 3 dataset

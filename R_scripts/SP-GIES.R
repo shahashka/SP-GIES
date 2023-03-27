@@ -9,30 +9,38 @@ source("../cupc/cuPC.R")
 
 # Given file paths for the dataset, targets and target indices, run SP-GIES
 # Optionally provide a path to a pre-generated skeleton
-run_from_file_sp_gies <- function(dataset_path, target_path, target_index_path, save_path, skeleton_path=FALSE, save_pc=FALSE) {
-    dataset <- read.table(dataset_path, sep=",", header=FALSE)
+run_from_file_sp_gies <- function(dataset_path, target_path, target_index_path, save_path, threshold=0, skeleton_path=FALSE, save_pc=FALSE, obs=FALSE, max_degree=integer(0)) {
+    dataset <- read.table(dataset_path, sep=",", header=TRUE)
     targets <- read.table(target_path, sep=",", header=FALSE)
     targets.index <- read.table(target_index_path, sep=",", header=FALSE)
     print(dim(dataset))
 
-    targets <- split(targets, 1:nrow(targets))
-    targets <- lapply(targets, function(x) x[!is.na(x)])
-    targets_init <- list(integer(0))
-    targets <- append(targets_init, targets)
-    targets.index <- unlist(targets.index)
-
-    if (skeleton_path) {
+    if (obs) {
+       targets <- list(integer(0))
+       print(dim(dataset))
+       targets.index <- numeric(dim(dataset)[1]) + 1
+    }
+    else{
+	targets <- split(targets, 1:nrow(targets))
+    	targets <- lapply(targets, function(x) x[!is.na(x)])
+    	targets_init <- list(integer(0))
+    	targets <- append(targets_init, targets)
+    	targets.index <- unlist(targets.index)
+}
+    if (is.character(skeleton_path)) {
         skeleton <- read.table(skeleton_path, sep=",", header=FALSE)
         skeleton <- as(skeleton,"matrix")
-        #make symmetric
-        skeleton[lower.tri(skeleton)] = t(skeleton)[lower.tri(skeleton)]
-        skeleton <- as.data.frame(skeleton)
-        skeleton <- fixedGaps == 0
+
+        skeleton[abs(skeleton) < threshold] = 0
+	skeleton[abs(skeleton) >= threshold] = 1
+	print(sum(skeleton))
+	skeleton <- as.data.frame(skeleton)
+        skeleton <- skeleton == 0
         class(skeleton) <- "logical"
-        sp_gies_from_skeleton(dataset, targets, targets.index, skeleton, save_path, save_pc)
+	sp_gies_from_skeleton(dataset, targets, targets.index, skeleton, save_path, save_pc, max_degree=max_degree)
     }
     else {
-        sp_gies(dataset, targets, targets.index, save_path, save_pc)
+        sp_gies(dataset, targets, targets.index, save_path, save_pc, max_degree=max_degree)
     }
 }
 
@@ -41,11 +49,12 @@ run_from_file_sp_gies <- function(dataset_path, target_path, target_index_path, 
 # if save_pc is set to TRUE
 # Also prints the time to solution which includes calculating the sufficient statistics for the PC algorithm
 sp_gies <- function(dataset, targets, targets.index, save_path, save_pc=FALSE, max_degree=integer(0)) {
-    tic("cupc")
-    tic("gies")
+    tic()
+    tic()
     corrolationMatrix <- cor(dataset)
     p <- ncol(dataset)
     suffStat <- list(C = corrolationMatrix, n = nrow(dataset))
+    print("suff stats")
     cuPC_fit <- cu_pc(suffStat, p=p, alpha=0.01)
     print("The total time consumed by cuPC is:")
     toc()
@@ -71,9 +80,10 @@ sp_gies <- function(dataset, targets, targets.index, save_path, save_pc=FALSE, m
 
 # Same method as above, except skeleton comes from another algorithm. fixedGaps is a logical array that
 # is  FALSE for all edges in the skeleton and TRUE otherwise
- sp_gies_from_skeleton <- function(dataset, targets, targets.index, fixedGaps, save_path, save_pc=FALSE) {
+ sp_gies_from_skeleton <- function(dataset, targets, targets.index, fixedGaps, save_path, save_pc=FALSE, max_degree=integer(0)) {
+    tic()
     score <- new("GaussL0penIntScore", data = dataset, targets=targets, target.index=targets.index)
-    result <- pcalg::gies(score, fixedGaps=fixedGaps, targets=targets)
+    result <- pcalg::gies(score, fixedGaps=fixedGaps, targets=targets, maxDegree=max_degree)
     print("The total time consumed by SP-GIES is:")
     toc()
     write.csv(result$repr$weight.mat() ,row.names = FALSE, file = paste(save_path, 'sp-gies-adj_mat.csv',sep = ''))

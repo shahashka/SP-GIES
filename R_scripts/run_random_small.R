@@ -19,7 +19,7 @@ for (network in list('ER', 'scale', 'small')) {
         dataset <- dataset[,1:ncol(dataset)-1]
         targets.index <- targets.index + 1
         # SP-GIES_OI
-        sp_gies(dataset, targets, targets.index, save_path=paste(folder, x, "_", sep=""))
+        sp_gies(dataset, targets, targets.index, save_path=paste(folder, x, "_", sep=""), save_pc=TRUE)
         # GIES-OI
         gies(dataset, targets, targets.index, save_path=paste(folder, x, "_", sep=""))
 

@@ -28,7 +28,7 @@ The repo contains three types of data: (1) Gaussian random data from Erdos Renyi
 To create random data, use the script ```create_random_data.py```. For examples of usage, check ```gen_scaling_data.sh```
 To create DREAM4 insilico data in the correct format run the following to create the correct csv files:
 ``` 
-python convert_dream4 -d insilico_size10_3 
+python convert_dream4.py -d insilico_size10_3 
 ```
 
 ### Run

@@ -3,7 +3,7 @@ source("GIES.R")
 source("SP-GIES.R")
 
 # Run small world random network small world size 1000
-folder <- "../random_test_set_fewer_1000_small/"
+folder <- "../random_test_set_scaling_1000_small/"
 x=0
 dataset_OI_path <- paste(folder,"data_joint_", x,".csv", sep="")
 dataset <- read.table(dataset_OI_path, sep=",", header=TRUE)
@@ -15,7 +15,7 @@ targets <- append(targets_init, targets)
 dataset <- dataset[,1:ncol(dataset)-1]
 targets.index <- targets.index + 1
 # SP-GIES_OI
-sp_gies(dataset, targets, targets.index, save_path=paste(folder, x, "_", sep=""))
+sp_gies(dataset, targets, targets.index, save_path=paste(folder, x, "_", sep=""), save_pc=TRUE)
 # GIES-OI
 gies(dataset, targets, targets.index, save_path=paste(folder, x, "_", sep=""), max_degree=10)
 

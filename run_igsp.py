@@ -50,7 +50,7 @@ def run_regulon_db():
 
 
 def run_dream4():
-    for d in range(1,6):
+    for d in range(3,4):
         print(d)
         data = pd.read_csv("./insilico_size10_{}/insilico_size10_{}_combine.csv".format(d,d))
         obs_data = data.loc[data['target']==0]
@@ -83,8 +83,8 @@ def run_random():
     for network in ["ER", "scale", "small"]:
         for i in range(30):
             data = pd.read_csv("./random_test_set_10_{}/data_joint_{}.csv".format(network, i))
-            obs_data = data.iloc[data['target'] == 0]
-            int_data = data.iloc[data['target'] != 0]
+            obs_data = data.loc[data['target'] == 0]
+            int_data = data.loc[data['target'] != 0]
             obs_data_no_targets = obs_data.loc[:, obs_data.columns != 'target'].to_numpy()
             int_data_no_targets = int_data.loc[:, int_data.columns != 'target']
             iv_samples_list = [np.expand_dims(row.to_numpy(), axis=0) for _, row in int_data_no_targets.iterrows()]
@@ -102,7 +102,7 @@ def run_random():
             ci_tester = conditional_independence.MemoizedCI_Tester(conditional_independence.partial_correlation_test,
                                                                    obs_suffstat, alpha=alpha)
             invariance_tester = conditional_independence.MemoizedInvarianceTester(
-                conditional_independence.gauss_invariance_suffstat,
+                conditional_independence.gauss_invariance_test,
                 invariance_suffstat, alpha=alpha_inv)
 
             est_dag = igsp(setting_list, nodes, ci_tester, invariance_tester)
@@ -115,8 +115,8 @@ def run_random():
 
 def run_random_large():
         data = pd.read_csv("./random_test_set_1000_{}/data_joint_{}.csv".format("small_world", 0))
-        obs_data = data.iloc[data['target'] == 0]
-        int_data = data.iloc[data['target'] != 0]
+        obs_data = data.loc[data['target'] == 0]
+        int_data = data.loc[data['target'] != 0]
         obs_data_no_targets = obs_data.loc[:, obs_data.columns != 'target'].to_numpy()
         int_data_no_targets = int_data.loc[:, int_data.columns != 'target']
         iv_samples_list = [np.expand_dims(row.to_numpy(), axis=0) for _, row in int_data_no_targets.iterrows()]
@@ -143,7 +143,9 @@ def run_random_large():
         np.savetxt("./random_test_set_1000_{}/igsp_{}_adj.csv".format("small_norm",0), edge_to_adj(est_dag.arcs, list(est_dag.nodes)), delimiter=",")
         np.savetxt("./random_test_set_1000_{}/obs_igsp_{}_adj.csv".format("small_norm",0), edge_to_adj(est_dag_obs.arcs, list(est_dag.nodes)), delimiter=",")
 
-#run_regulon_db()
 run_dream4()
-#run_random()
+run_random()
+
+# Larger networks take hours to converge
 #run_random_large()
+#run_regulon_db()

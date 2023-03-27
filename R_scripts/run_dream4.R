@@ -26,6 +26,7 @@ class(skeleton) <- "logical"
 
 # SP-GIES-OI
 sp_gies_from_skeleton(dataset, targets, targets.index, skeleton, save_path=directory)
+sp_gies(dataset, targets, targets.index, save_path=paste(directory, "/pc_skel_",sep=""), save_pc=TRUE)
 
 # GIES-OI
 gies(dataset, targets, targets.index, save_path=directory)
@@ -41,6 +42,6 @@ dataset <- dataset[,1:ncol(dataset)-1]
 targets.index <- targets.index + 1
 
 #GES-O
-gies(dataset, targets, targets.index, save_path= paste(directory, "/obs_", x,sep=""))
+gies(dataset, targets, targets.index, save_path= paste(directory, "/obs_",sep=""))
 
 

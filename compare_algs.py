@@ -47,6 +47,7 @@ def edge_to_dag(edges):
 
 # Helper function to print the SHD, SID, AUC for a set of algorithms and networks
 # Also handles averaging over several sets of networks (e.g the random comparison averages over 30 different generated graphs)
+# Default turn off sid, since it is computationally expensive
 def get_scores(alg_names, networks, ground_truth, get_sid=False):
     for name, net in zip(alg_names, networks):
         if type(net) == list and type(ground_truth) == list:
@@ -128,18 +129,21 @@ def test_dream4():
     sp_gies_network = pd.read_csv("./insilico_size10_{}/sp-gies-adj_mat.csv".format(d), header=0).to_numpy()
     gies_network =  pd.read_csv("./insilico_size10_{}/gies-adj_mat.csv".format(d), header=0).to_numpy()
     gies_o_network =  pd.read_csv("./insilico_size10_{}/obs_gies-adj_mat.csv".format(d), header=0).to_numpy()
-    pc_network = pd.read_csv("./insilico_size10_{}/obs_cupc-adj_mat.csv".format(d), header=0).to_numpy()
+    pc_network = pd.read_csv("./insilico_size10_{}/pc_skel_cupc-adj_mat.csv".format(d), header=0).to_numpy()
+    igsp_network = pd.read_csv("./insilico_size10_{}/igsp_adj.csv".format(d), header=0).to_numpy()
 
     pc_graph = adj_to_dag(pc_network, nodes)
     sp_gies_graph = adj_to_dag(sp_gies_network, nodes)
     gies_graph = adj_to_dag(gies_network, nodes)
     gies_o_graph = adj_to_dag(gies_o_network, nodes)
-
-    get_scores(["PC-O", "GES-O", "GIES-OI","SP-GIES-OI", "NULL"],
-               [pc_graph, gies_o_graph, gies_graph, sp_gies_graph, np.zeros((len(nodes), len(nodes)))], true_graph)
+    igsp_graph = adj_to_dag(igsp_network, nodes)
+    
+    get_scores(["PC-O", "GES-O", "GIES-OI","SP-GIES-OI", "IGSP-OI", "NULL"],
+               [pc_graph, gies_o_graph, gies_graph, sp_gies_graph, igsp_graph, np.zeros((len(nodes), len(nodes)))], true_graph)
 
 # Evaluate the performance of algorithms on the random datasets of size 10 nodes(Erdos Renyi, scale-free, and small-world)
 # Average over 30 generated graphs for each network type
+# Results will differ from paper since SP-GIES uses PC skeleton here but in paper we use CLR/ARACNE
 def test_random():
     num_nodes = 10
     random = [ "ER","scale","small"]
@@ -150,6 +154,7 @@ def test_random():
         pc = []
         gies = []
         gies_o = []
+        igsp = []
         ground_truth = []
         for n in range(num_graphs):
             edges = pd.read_csv( "./random_test_set_{}_{}/bn_network_{}.csv".format(num_nodes,r, n), header=0)
@@ -166,22 +171,53 @@ def test_random():
             sp_gies_network = pd.read_csv("./random_test_set_{}_{}/{}_sp-gies-adj_mat.csv".format(num_nodes,r,n), header=0).to_numpy()
             gies_network =  pd.read_csv("./random_test_set_{}_{}/{}_gies-adj_mat.csv".format(num_nodes,r,n), header=0).to_numpy()
             gies_o_network = pd.read_csv("./random_test_set_{}_{}/obs_{}_gies-adj_mat.csv".format(num_nodes,r, n), header=0).to_numpy()
-            pc_network = pd.read_csv("./random_test_set_{}_{}/obs_{}_cupc-adj_mat.csv".format(num_nodes,r, n), header=0).to_numpy()
+            pc_network = pd.read_csv("./random_test_set_{}_{}/{}_cupc-adj_mat.csv".format(num_nodes,r, n), header=0).to_numpy()
+            igsp_network = pd.read_csv("./random_test_set_{}_{}/igsp_{}_adj.csv".format(num_nodes,r, n), header=None).to_numpy()
+
             sp_gies_graph = adj_to_dag(sp_gies_network, nodes)
             gies_graph = adj_to_dag(gies_network, nodes)
             pc_graph = adj_to_dag(pc_network, nodes)
             gies_o_graph = adj_to_dag(gies_o_network, nodes)
-
+            igsp_graph = adj_to_dag(igsp_network, nodes)
+            
             pc.append(pc_graph)
             gies.append(gies_graph)
             sp_gies.append(sp_gies_graph)
             gies_o.append(gies_o_graph)
+            igsp.append(igsp_graph)
             ground_truth.append(true_graph)
 
-        get_scores(["PC-O", "GES-O", "GIES-IO", "SP-GIES-IO","NULL"],
-                   [pc, gies_o, gies, sp_gies, np.zeros((num_nodes, num_nodes))], ground_truth)
+        get_scores(["PC-O", "GES-O", "GIES-OI", "SP-GIES-OI","IGSP-OI", "NULL"],
+                   [pc, gies_o, gies, sp_gies, igsp, np.zeros((num_nodes, num_nodes))], ground_truth)
 
+def test_random_large():
+    n = 0
+    num_nodes=1000
+    folder = "./random_test_set_scaling_1000_small"
+    edges = pd.read_csv( "{}/bn_network_{}.csv".format(folder, n), header=0)
+    df = pd.read_csv("{}/data_{}.csv".format(folder,n), header=0)
 
+    edges_pos = [(r['start'], r['end']) for i, r in edges.iterrows() if r['edge'] == 1]
+    true_graph = edge_to_dag(edges_pos)
+    nodes = list(df.columns)
+    nodes.remove('target')
+    true_graph.add_nodes_from(nodes)
+    df = df.drop('target', axis=1)
+    n=0
+    sp_gies_network = pd.read_csv("{}/{}_sp-gies-adj_mat.csv".format(folder,n), header=0).to_numpy()
+    gies_network =  pd.read_csv("{}/{}_gies-adj_mat.csv".format(folder,n), header=0).to_numpy()
+    gies_o_network = pd.read_csv("{}/obs_{}_gies-adj_mat.csv".format(folder, n), header=0).to_numpy()
+    pc_network = pd.read_csv("{}/{}_cupc-adj_mat.csv".format(folder, n), header=0).to_numpy()
+
+    sp_gies_graph = adj_to_dag(sp_gies_network, nodes)
+    gies_graph = adj_to_dag(gies_network, nodes)
+    pc_graph = adj_to_dag(pc_network, nodes)
+    gies_o_graph = adj_to_dag(gies_o_network, nodes)
+
+    get_scores(["PC-O", "GES-O", "GIES-OI", "SP-GIES-OI", "NULL"],
+               [pc_graph, gies_o_graph, gies_graph, sp_gies_graph,  np.zeros((num_nodes, num_nodes))], true_graph)
+    
 test_regulondb()
 test_random()
 test_dream4()
+test_random_large()

@@ -11,42 +11,11 @@ from rpy2.robjects.packages import importr
 import rpy2.robjects as ro
 import rpy2.robjects.numpy2ri
 from utils import edge_to_dag, adj_to_edge, adj_to_dag, get_scores
+from sp_gies import sp_gies
 rpy2.robjects.numpy2ri.activate()
 pcalg = importr('pcalg')
 base = importr('base')
 # PARALLEL STRUCTURE LEARNING
-def sp_gies_py(data, skel, target_map, outdir):
-    fixed_gaps = np.array((skel == 0), dtype=int)
-    target_index = data.loc[:, 'target'].to_numpy()
-    target_index = np.array([0 if i == 0 else target_map[i] + 1 for i in target_index])
-    targets = np.unique(target_index)[1:]  # Remove 0 the observational target
-    target_index += 1  # R indexes from 1
-    data = data.drop(columns=['target']).to_numpy()
-
-    nr, nc = data.shape
-    D = ro.r.matrix(data, nrow=nr, ncol=nc)
-    ro.r.assign("data", D)
-
-    rcode = ','.join(str(int(i)) for i in targets)
-    rcode = 'append(list(integer(0)), list({}))'.format(rcode)
-    T = ro.r(rcode)
-    ro.r.assign("targets", T)
-
-    TI = ro.IntVector(target_index)
-    ro.r.assign("target_index", TI)
-
-    nr, nc = fixed_gaps.shape
-    FG = ro.r.matrix(fixed_gaps, nrow=nr, ncol=nc)
-    ro.r.assign("fixed_gaps", FG)
-
-    score = ro.r.new('GaussL0penIntScore', ro.r['data'], ro.r['targets'], ro.r['target_index'])
-    ro.r.assign("score", score)
-    result = pcalg.gies(ro.r['score'], fixedGaps=ro.r['fixed_gaps'], targets=ro.r['targets'], maxDegree=10)
-    ro.r.assign("result", result)
-    rcode = 'write.csv(result$repr$weight.mat(), row.names = FALSE,' \
-            ' file = paste("{}", "sp-gies-adj_mat.csv", sep=""))'.format(outdir)
-    ro.r(rcode)
-    return
 
 def markov_blankets(skeleton, data, outdir):
     mrf = nx.from_numpy_array(skeleton)
@@ -80,7 +49,7 @@ def local_structure_learn(it, outdir):
     skel = pd.read_csv("{}/part_{}/skel.csv".format(outdir, it), header=None).to_numpy()
     target_map = pd.read_csv("{}/part_{}/map.csv".format(outdir, it), header=0)
     target_map = dict(zip(target_map.iloc[:, 0], target_map.iloc[:, 1]))
-    sp_gies_py(data, skel, target_map,"{}/part_{}/".format(outdir, it) )
+    sp_gies(data, skel, target_map,"{}/part_{}/".format(outdir, it) )
     return 0
 
 def partition(skeleton, data, outdir):
@@ -103,7 +72,7 @@ def skeleton(data, outdir):
     # Save adjacency matrix is outdir
 
     # Read cuPC generated skeleton
-    return pd.read_csv("./random_test_set_100_small/0_cupc-adj_mat.csv", header=0).to_numpy()
+    return pd.read_csv("../random_test_set_100_small/0_cupc-adj_mat.csv", header=0).to_numpy()
 
 def resolve_global(outdir, num_partitions):
     # Read all dags in directory and create a global dag
@@ -146,13 +115,13 @@ def global_structure_learn(data, outdir):
 
 
 if __name__ == '__main__':
-    data = pd.read_csv("./random_test_set_100_small/data_joint_0.csv", header=0)
-    sp_gies_network = pd.read_csv("./random_test_set_100_small/0_sp-gies-adj_mat.csv", header=0).to_numpy()
+    data = pd.read_csv("../random_test_set_100_small/data_joint_0.csv", header=0)
+    sp_gies_network = pd.read_csv("../random_test_set_100_small/0_sp-gies-adj_mat.csv", header=0).to_numpy()
     nodes = list(data.columns)
     nodes.remove('target')
     sp_gies_graph = adj_to_dag(sp_gies_network, nodes)
 
-    edges = pd.read_csv("./random_test_set_100_small/bn_network_0.csv", header=0)
+    edges = pd.read_csv("../random_test_set_100_small/bn_network_0.csv", header=0)
     edges_pos = [(r['start'], r['end']) for i, r in edges.iterrows() if r['edge'] == 1]
     G_true = edge_to_dag(edges_pos)
 

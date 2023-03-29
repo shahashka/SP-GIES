@@ -12,7 +12,7 @@ def edge_to_adj(edges, all_nodes):
     return adj_mat
 
 def run_regulon_db():
-    data = pd.read_csv("./regulondb/data_smaller.csv", header=None)
+    data = pd.read_csv("../regulondb/data_smaller.csv", header=None)
     adj = GENIE3(expr_data=data.to_numpy(), tree_method='XG')
     np.savetxt("./regulondb/genie_adj.csv",adj, delimiter=",")
 

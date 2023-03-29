@@ -75,6 +75,22 @@ def get_scores(alg_names, networks, ground_truth, get_sid=False):
             print("{} {} {} {}".format(name, shd, sid, auc))
 
 
+def test_regulondb_subnetwork():
+    print("REGULONDB_SUB")
+    true_adj = pd.read_csv("regulondb/local_graph/ground_skel_subgraph_local.csv", header=None).values
+    true_adj = np.abs(true_adj)
+    np.fill_diagonal(true_adj, 0)
+    clr_network = pd.read_csv("./regulondb/local_graph/clr_skel_subgraph_local.csv", header=None).to_numpy()
+    sp_gies_network = pd.read_csv("./regulondb/local_graph/clr_skel_subgraph_local_sp-gies-adj_mat.csv", header=0).to_numpy()
+    sp_gies_network[np.abs(sp_gies_network) > 0] = 1
+    genes =np.arange(true_adj.shape[0])
+    clr_graph = adj_to_dag(clr_network, genes)
+    sp_gies_graph = adj_to_dag(sp_gies_network, genes)
+    true_graph = adj_to_dag(true_adj, np.arange(true_adj.shape[1]))
+    get_scores(["CLR", "SP-GIES-OI", "NULL"],
+               [clr_graph, sp_gies_graph,
+                np.zeros((len(genes), len(genes)))], true_graph)
+
 # Evaluate the performance of algorithms on the regulondb dataset
 def test_regulondb():
     print("REGULONDB")
@@ -217,7 +233,8 @@ def test_random_large():
     get_scores(["PC-O", "GES-O", "GIES-OI", "SP-GIES-OI", "NULL"],
                [pc_graph, gies_o_graph, gies_graph, sp_gies_graph,  np.zeros((num_nodes, num_nodes))], true_graph)
     
-test_regulondb()
-test_random()
-test_dream4()
-test_random_large()
+# test_regulondb()
+# test_random()
+# test_dream4()
+# test_random_large()
+test_regulondb_subnetwork()

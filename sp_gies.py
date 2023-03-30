@@ -13,6 +13,8 @@ def sp_gies(data, skel, outdir, target_map=None):
     target_index = data.loc[:, 'target'].to_numpy()
     if target_map is not None:
         target_index = np.array([0 if i == 0 else target_map[i] + 1 for i in target_index])
+
+    # Assume that targets are each column
     targets = np.unique(target_index)[1:]  # Remove 0 the observational target
     target_index += 1  # R indexes from 1
     data = data.drop(columns=['target']).to_numpy()
@@ -41,7 +43,11 @@ def sp_gies(data, skel, outdir, target_map=None):
     rcode = 'result$repr$weight.mat()'
     adj_mat = ro.r(rcode)
     ro.r.assign("adj_mat", adj_mat)
+
+    rcode =  'pcalg::opt.target(result$essgraph, max.size = 1, use.node.names = TRUE)'
+    opt_intervene = ro.r(rcode)
+    
     rcode = 'write.csv(adj_mat, row.names = FALSE,' \
             ' file = paste("{}", "sp-gies-adj_mat.csv", sep=""))'.format(outdir)
     ro.r(rcode)
-    return adj_mat
+    return adj_mat, opt_intervene

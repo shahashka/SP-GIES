@@ -4,3 +4,6 @@
 [submodule "CausalDiscoveryToolbox"]
 	path = CausalDiscoveryToolbox
 	url = https://github.com/shahashka/CausalDiscoveryToolbox.git
+[submodule "graphical_models"]
+	path = graphical_models
+	url = https://github.com/shahashka/graphical_models.git

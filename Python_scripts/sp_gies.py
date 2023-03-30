@@ -8,7 +8,7 @@ from utils import edge_to_dag, adj_to_edge, adj_to_dag, get_scores
 rpy2.robjects.numpy2ri.activate()
 pcalg = importr('pcalg')
 base = importr('base')
-def sp_gies(data, skel, outdir, target_map=None):
+def sp_gies(data, skel, outdir=None, target_map=None):
     fixed_gaps = np.array((skel == 0), dtype=int)
     target_index = data.loc[:, 'target'].to_numpy()
     if target_map is not None:
@@ -41,7 +41,9 @@ def sp_gies(data, skel, outdir, target_map=None):
     rcode = 'result$repr$weight.mat()'
     adj_mat = ro.r(rcode)
     ro.r.assign("adj_mat", adj_mat)
-    rcode = 'write.csv(adj_mat, row.names = FALSE,' \
-            ' file = paste("{}", "sp-gies-adj_mat.csv", sep=""))'.format(outdir)
-    ro.r(rcode)
+
+    if outdir:
+        rcode = 'write.csv(adj_mat, row.names = FALSE,' \
+                ' file = paste("{}", "sp-gies-adj_mat.csv", sep=""))'.format(outdir)
+        ro.r(rcode)
     return adj_mat

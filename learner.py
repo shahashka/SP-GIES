@@ -72,7 +72,7 @@ class GIESLearner(Learner):
                 #A = np.tril(A) + np.triu(A.T, 1)
                 self.skeleton = pd.DataFrame(data=(A == 0))
         else:
-            self.skeleton = None
+            self.skeleton = pd.DataFrame(data=np.zeros((len(all_nodes), len(all_nodes))))
 
     def sample_posterior(self, data):
         posterior = []
@@ -80,8 +80,10 @@ class GIESLearner(Learner):
         for _ in range(self.num_graphs):
             d_sub_inds = np.random.choice(np.arange(data.shape[0]), self.subset_size, replace=self.replace)
             d_sub = data.iloc[d_sub_inds]
-            adj_mat, best_intervention = sp_gies(data_sub, self.skeleton.to_numpy()) 
-            best_model = nx.DiGraph(adj_mat)
+            print(d_sub)
+            adj_mat, best_intervention = sp_gies(d_sub, self.skeleton.to_numpy()) 
+            best_model = nx.relabel_nodes(nx.DiGraph(adj_mat),
+                                {idx: i for idx, i in enumerate(self.all_nodes)})
             posterior.append(best_model)
 
             if best_intervention.shape[0] == 0:

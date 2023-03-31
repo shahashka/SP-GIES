@@ -15,8 +15,12 @@ def sp_gies(data, skel, outdir=None, target_map=None):
         target_index = np.array([0 if i == 0 else target_map[i] + 1 for i in target_index])
 
     # Assume that targets are each column
-    targets = np.unique(target_index)[1:]  # Remove 0 the observational target
-    target_index += 1  # R indexes from 1
+    targets = np.unique(target_index)[1:] # Remove 0 the observational target
+    if len(targets) > 0:
+        # R indexes from 1 (+1) and observational target gets added later (+1)
+        target_index = np.array([np.where(targets==i)[0][0]+2 if i > 0 else 1 for i in target_index])
+    else:
+        target_index += 1
     data = data.drop(columns=['target']).to_numpy()
 
     nr, nc = data.shape

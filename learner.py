@@ -80,8 +80,7 @@ class GIESLearner(Learner):
         for _ in range(self.num_graphs):
             d_sub_inds = np.random.choice(np.arange(data.shape[0]), self.subset_size, replace=self.replace)
             d_sub = data.iloc[d_sub_inds]
-            print(d_sub)
-            adj_mat, best_intervention = sp_gies(d_sub, self.skeleton.to_numpy()) 
+            adj_mat, best_intervention = sp_gies(d_sub, self.skeleton.to_numpy())
             best_model = nx.relabel_nodes(nx.DiGraph(adj_mat),
                                 {idx: i for idx, i in enumerate(self.all_nodes)})
             posterior.append(best_model)

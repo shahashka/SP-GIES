@@ -2,7 +2,7 @@ import conditional_independence
 from pgmpy.estimators import HillClimbSearch, K2Score
 from pgmpy.base import DAG
 from graphical_model_learning import igsp, unknown_target_igsp
-from sp_gies import sp_gies
+from sp_gies import sp_gies, gies
 import numpy as np
 import networkx as nx
 import pandas as pd
@@ -66,13 +66,10 @@ class GIESLearner(Learner):
                 self.skeleton = pd.read_csv(skeleton_file, sep='\t', header=0)
             else:
                 A = pd.read_csv(skeleton_file, header=0)
-                A = A.to_numpy()
-                #threshold = 1.5
-                #A[np.abs(A) < threshold] = 0
-                #A = np.tril(A) + np.triu(A.T, 1)
-                self.skeleton = pd.DataFrame(data=(A == 0))
+                #A = A.to_numpy()
+                self.skeleton = A.to_numpy()# pd.DataFrame(data=(A == 1))
         else:
-            self.skeleton = pd.DataFrame(data=np.ones((len(all_nodes), len(all_nodes))))
+            self.skeleton = None
 
     def sample_posterior(self, data):
         posterior = []
@@ -80,7 +77,7 @@ class GIESLearner(Learner):
         for _ in range(self.num_graphs):
             d_sub_inds = np.random.choice(np.arange(data.shape[0]), self.subset_size, replace=self.replace)
             d_sub = data.iloc[d_sub_inds]
-            adj_mat, best_intervention = sp_gies(d_sub, self.skeleton.to_numpy())
+            adj_mat, best_intervention = sp_gies(d_sub, self.skeleton) if self.skeleton is not None else gies(d_sub)
             best_model = nx.relabel_nodes(nx.DiGraph(adj_mat),
                                 {idx: i for idx, i in enumerate(self.all_nodes)})
             posterior.append(best_model)

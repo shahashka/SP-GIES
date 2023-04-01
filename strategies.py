@@ -230,9 +230,6 @@ class IGStrategy(Strategy):
         special_node = "P1" if "P1" in self.data.columns else None
         logP = np.array([self.gauss_dag_logpdf(dag, D_norm, cov, node=special_node).sum(axis=0) for dag in self.posterior['dags']])
 
-        # TODO how to handle interventional data in calculating MLE
-        # dags_w_thetas = self.posterior['dags'] if self.inter_data is not None else [self.set_MLE(data, dag) for dag in
-        #                                                          self.posterior['dags']]
         dags_w_thetas =  [self.set_MLE(data, dag) for dag in self.posterior['dags']]
         # Loop through all selected interventions and sum the interventional log liklihood
         for int_set in self.selected:
@@ -252,14 +249,6 @@ class IGStrategy(Strategy):
             P2 = np.zeros(len(self.posterior['dags']))
             for d, dag in enumerate(dags_w_thetas):
                 for m in range(M):
-
-                    # Calculate logQ=log[P(G|D)*P(y|G)]
-                    # Get y from a file or by modifying existing dataset
-                    # if self.inter_data is not None:
-                    #     # TODO this is impossible in the real world! you don't have access to data you haven't intervened from yet!!
-                    #     # It would be cool to make this an ML model
-                    #     _, int_type = sample_from_file(int_set, self.inter_data, self.obs_data.shape[0], self.learner)
-                    # else:
                     _, int_type = sample_gauss_dag(self.genes,int_set, dag, self.obs_data.shape[0], self.learner)
                     # logQ  = logP(G|D) + logP(y|G)
                     logQ_iter = int_type.gauss_dag_logpdf(dag, D_norm, special_node) + logP[d]
@@ -316,8 +305,8 @@ def shd_gene_1(dags, true_dag):
     if true_dag is None:
         return 0
     true_dag_nx = nx.DiGraph()
-    true_dag_nx.add_nodes_from(dags[0].nodes)
-    true_dag_nx.add_edges_from(true_dag['model'])
+    true_dag_nx.add_nodes_from(true_dag['model'].nodes)
+    true_dag_nx.add_edges_from(true_dag['model'].arcs)
     for d in dags:
         true_parents = set(true_dag_nx.predecessors("G1"))
         dag_parents = set(d.predecessors("G1"))
@@ -352,7 +341,10 @@ def sample_from_file(intervention, data, data_obs_ind, learner):
     gene_ind = learner.get_index(intervention)
     df = data[data['target'] == gene_ind]
     df_int = df.loc[:, df.columns != 'target']
-    intervention = Intervention(intervention, df_int, data_obs_ind)
+    if df_int.shape[0] == 2:
+        intervention = KO_KD_Intervention(intervention, df_int, data_obs_ind)
+    else:
+        intervention = Intervention(intervention, df_int, data_obs_ind)
     return df, intervention
 
 def sample_gauss_dag(columns, intervention, bn, data_obs_ind, learner, nsamples=10):

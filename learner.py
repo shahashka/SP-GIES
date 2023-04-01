@@ -72,7 +72,7 @@ class GIESLearner(Learner):
                 #A = np.tril(A) + np.triu(A.T, 1)
                 self.skeleton = pd.DataFrame(data=(A == 0))
         else:
-            self.skeleton = pd.DataFrame(data=np.zeros((len(all_nodes), len(all_nodes))))
+            self.skeleton = pd.DataFrame(data=np.ones((len(all_nodes), len(all_nodes))))
 
     def sample_posterior(self, data):
         posterior = []
@@ -89,7 +89,7 @@ class GIESLearner(Learner):
                 edge_interventions.append('')
                 print("no optimal intervention found")
             else:
-                edge_interventions.append("G{}".format(int(best_intervention[0][0][1:])))
+                edge_interventions.append("G{}".format(int(best_intervention[0])))
         return {'dags':posterior, 'optimal_interventions':edge_interventions}
 
 class IGSPLearner(Learner):

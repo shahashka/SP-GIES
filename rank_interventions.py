@@ -135,8 +135,6 @@ def func(it,  args):
                                   name='SP-GIES x random'),
                    IGStrategy(learner_hybrid, data_gene, data_intervene, obscured_nodes, genes, priors, name='SP-GIES x info. gain'),
                    EdgeOrientationStrategy(learner_hybrid, data_gene, data_intervene, obscured_nodes,genes,priors, name='SP-GIES x edge orient.')]
-    #strategies = [ DiversitySamplingStrategy(learner_hybrid, data_gene, data_intervene, obscured_nodes, genes, priors,
-#                                 name='SP-GIES x diversity')]
     for s in strategies:
         s.init(args.num_rounds, bn_generator)
         if it == 0:

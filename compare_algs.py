@@ -6,7 +6,7 @@ import itertools
 import warnings
 import time
 
-from utils import get_scores, edge_to_dag, edge_to_adj, adj_to_dag
+from utils import get_scores, edge_to_dag, edge_to_adj, adj_to_dag, get_recall
 warnings.filterwarnings("ignore")
 font = {'family' : 'normal',
         'weight' : 'bold',
@@ -33,6 +33,9 @@ def test_regulondb_subnetwork():
     get_scores(["CLR", "SP-GIES-OI", "NULL"],
                [clr_graph, sp_gies_graph,
                 np.zeros((len(genes), len(genes)))], true_graph)
+    get_recall(["CLR", "SP-GIES-OI", "NULL"], [clr_graph, sp_gies_graph,
+                np.zeros((len(genes), len(genes)))], true_graph)
+
 
 # Evaluate the performance of algorithms on the regulondb dataset
 def test_regulondb():
@@ -69,6 +72,10 @@ def test_regulondb():
 
     get_scores(["ARACNE-AP", "CLR",  "SP-GIES-OI", "GIES-OI", "GES-O", "NULL"],
                [aracne_graph, clr_graph, sp_gies_graph, gies_graph, gies_o_graph, 
+                np.zeros((len(genes), len(genes)))], true_graph)
+
+    get_recall(["ARACNE-AP", "CLR",  "SP-GIES-OI", "GIES-OI", "GES-O", "NULL"],
+               [aracne_graph, clr_graph, sp_gies_graph, gies_graph, gies_o_graph,
                 np.zeros((len(genes), len(genes)))], true_graph)
 
 # Evaluate the performance of algorithms on the Dream4 size 10 network 3 dataset

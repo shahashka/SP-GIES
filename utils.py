@@ -2,7 +2,7 @@ import networkx as nx
 import numpy as np
 import itertools
 import cdt
-from sklearn.metrics import auc
+from sklearn.metrics import auc, recall_score
 
 def adj_to_edge(adj, nodes):
     edges = []
@@ -66,3 +66,10 @@ def get_scores(alg_names, networks, ground_truth, get_sid=False):
             sid = cdt.metrics.SID(ground_truth, net) if get_sid else 0
             auc, pr = cdt.metrics.precision_recall(ground_truth, net)
             print("{} {} {} {}".format(name, shd, sid, auc))
+
+def get_recall(alg_names, networks, ground_truth):
+    for name, net in zip(alg_names, networks):
+        g = cdt.metrics.retrieve_adjacency_matrix(ground_truth)
+        n = cdt.metrics.retrieve_adjacency_matrix(net)
+        recall = recall_score(g.flatten(), n.flatten())
+        print("{} recall is {}".format(g,n))

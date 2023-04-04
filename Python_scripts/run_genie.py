@@ -45,6 +45,6 @@ def run_random_large():
     np.savetxt("./random_test_set_1000_{}/gies_{}_adj.csv".format(network,0), adj, delimiter=",")
 
 run_regulon_db()
-run_dream4()
-run_random()
-run_random_large()
+# run_dream4()
+# run_random()
+# run_random_large()

@@ -9,7 +9,8 @@ source("../cupc/cuPC.R")
 
 # Given file paths for the dataset, targets and target indices, run SP-GIES
 # Optionally provide a path to a pre-generated skeleton
-run_from_file_sp_gies <- function(dataset_path, target_path, target_index_path, save_path, threshold=0, skeleton_path=FALSE, save_pc=FALSE, obs=FALSE, max_degree=integer(0)) {
+run_from_file_sp_gies <- function(dataset_path, target_path, target_index_path, save_path, threshold=0, skeleton_path=FALSE,
+save_pc=FALSE, obs=FALSE, max_degree=integer(0), lambda=integer(0)) {
     dataset <- read.table(dataset_path, sep=",", header=TRUE)
     targets <- read.table(target_path, sep=",", header=FALSE)
     targets.index <- read.table(target_index_path, sep=",", header=FALSE)
@@ -48,7 +49,7 @@ run_from_file_sp_gies <- function(dataset_path, target_path, target_index_path, 
 # and save the adjacency matrix in the save_path. Also saves the adjacency matrix of the skeleton (output of the cupc algorithm)
 # if save_pc is set to TRUE
 # Also prints the time to solution which includes calculating the sufficient statistics for the PC algorithm
-sp_gies <- function(dataset, targets, targets.index, save_path, save_pc=FALSE, max_degree=integer(0)) {
+sp_gies <- function(dataset, targets, targets.index, save_path, save_pc=FALSE, max_degree=integer(0), lambda=integer(0)) {
     tic()
     tic()
     corrolationMatrix <- cor(dataset)
@@ -70,7 +71,7 @@ sp_gies <- function(dataset, targets, targets.index, save_path, save_pc=FALSE, m
     fixedGaps <- fixedGaps == 0
     class(fixedGaps) <- "logical"
 
-    score <- new("GaussL0penIntScore", data = dataset, targets=targets, target.index=targets.index)
+    score <- new("GaussL0penIntScore", data = dataset, targets=targets, target.index=targets.index, lambda=lambda)
     result <- pcalg::gies(score, fixedGaps=fixedGaps, targets=targets, maxDegree=max_degree)
     print("The total time consumed by SP-GIES is:")
     toc()
@@ -80,10 +81,11 @@ sp_gies <- function(dataset, targets, targets.index, save_path, save_pc=FALSE, m
 
 # Same method as above, except skeleton comes from another algorithm. fixedGaps is a logical array that
 # is  FALSE for all edges in the skeleton and TRUE otherwise
- sp_gies_from_skeleton <- function(dataset, targets, targets.index, fixedGaps, save_path, save_pc=FALSE, max_degree=integer(0)) {
+ sp_gies_from_skeleton <- function(dataset, targets, targets.index, fixedGaps, save_path, save_pc=FALSE,
+ max_degree=integer(0), lambda=integer(0)) {
     tic()
     score <- new("GaussL0penIntScore", data = dataset, targets=targets, target.index=targets.index)
-    result <- pcalg::gies(score, fixedGaps=fixedGaps, targets=targets, maxDegree=max_degree)
+    result <- pcalg::gies(score, fixedGaps=fixedGaps, targets=targets, maxDegree=max_degree, lambda=lambda)
     print("The total time consumed by SP-GIES is:")
     toc()
     write.csv(result$repr$weight.mat() ,row.names = FALSE, file = paste(save_path, 'sp-gies-adj_mat.csv',sep = ''))

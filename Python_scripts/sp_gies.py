@@ -5,10 +5,43 @@ from rpy2.robjects.packages import importr
 import rpy2.robjects as ro
 import rpy2.robjects.numpy2ri
 from utils import edge_to_dag, adj_to_edge, adj_to_dag, get_scores
+from rpy2.robjects.packages import SignatureTranslatedAnonymousPackage
 rpy2.robjects.numpy2ri.activate()
 pcalg = importr('pcalg')
 base = importr('base')
-def sp_gies(data, skel, outdir, target_map=None):
+
+def cu_pc(data, outdir):
+    with open("cupc/cuPC.R") as file:
+        string = ''.join(file.readlines())
+    cupc = SignatureTranslatedAnonymousPackage(string, "cupc")
+    ro.r.assign("data", data)
+    rcode = 'cor(data)'
+    corMat = ro.r(rcode)
+    ro.r.assign("corrolationMatrix", corMat)
+
+    p = data.shape[1]
+    ro.r.assign("p",p)
+
+    rcode = 'list(C = corrolationMatrix, n = nrow(data))'
+    suffStat = ro.r(rcode)
+    ro.r.assign("suffStat", suffStat)
+
+    cuPC_fit = cupc.cu_pc(ro.r['suffStat'],p=ro.r['p'],alpha=0.05)
+    ro.r.assign("cuPC_fit", cuPC_fit)
+
+    rcode = 'as(cuPC_fit@graph, "matrix")'
+    skel = ro.r(rcode)
+    ro.r.assign("skel", skel)
+
+    rcode = "write.csv(skel ,row.names = FALSE, file = paste({}, 'cupc-adj_mat.csv',sep = ''))".format(outdir)
+    return skel
+
+def sp_gies(data, outdir, skel=None, target_map=None):
+    if skel is None:
+        obs_data = data.loc[data['target']==0]
+        obs_data = obs_data.drop(columns=['target'])
+        obs_data = obs_data.to_numpy()
+        skel = cu_pc(obs_data, outdir)
     fixed_gaps = np.array((skel == 0), dtype=int)
     target_index = data.loc[:, 'target'].to_numpy()
     if target_map is not None:

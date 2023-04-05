@@ -49,7 +49,7 @@ def local_structure_learn(it, outdir):
     skel = pd.read_csv("{}/part_{}/skel.csv".format(outdir, it), header=None).to_numpy()
     target_map = pd.read_csv("{}/part_{}/map.csv".format(outdir, it), header=0)
     target_map = dict(zip(target_map.iloc[:, 0], target_map.iloc[:, 1]))
-    sp_gies(data, skel, target_map,"{}/part_{}/".format(outdir, it) )
+    sp_gies(data, target_map, skel, "{}/part_{}/".format(outdir, it))
     return 0
 
 def partition(skeleton, data, outdir):

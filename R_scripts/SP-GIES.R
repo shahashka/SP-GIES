@@ -49,11 +49,13 @@ run_from_file_sp_gies <- function(dataset_path, target_path, target_index_path, 
 # if save_pc is set to TRUE
 # Also prints the time to solution which includes calculating the sufficient statistics for the PC algorithm
 sp_gies <- function(dataset, targets, targets.index, save_path, save_pc=FALSE, max_degree=integer(0)) {
+    obs_inds = which(targets.index = 1)[1]
+    obs_dataset = dataset[obs_inds]
     tic()
     tic()
-    corrolationMatrix <- cor(dataset)
-    p <- ncol(dataset)
-    suffStat <- list(C = corrolationMatrix, n = nrow(dataset))
+    corrolationMatrix <- cor(obs_dataset)
+    p <- ncol(obs_dataset)
+    suffStat <- list(C = corrolationMatrix, n = nrow(obs_dataset))
     print("suff stats")
     cuPC_fit <- cu_pc(suffStat, p=p, alpha=0.01)
     print("The total time consumed by cuPC is:")
@@ -63,7 +65,6 @@ sp_gies <- function(dataset, targets, targets.index, save_path, save_pc=FALSE, m
     if (save_pc) {
         write.csv(as(cuPC_fit@graph, "matrix") ,row.names = FALSE, file = paste(save_path, 'cupc-adj_mat.csv',sep = ''))
     }
-
 
     fixedGaps <- as(cuPC_fit@graph,"matrix")
     fixedGaps <- as.data.frame(fixedGaps)

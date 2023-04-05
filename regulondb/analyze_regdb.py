@@ -120,31 +120,33 @@ clr_digraph = nx.relabel_nodes(clr_digraph, dict(zip(clr_digraph.nodes, genes.to
 # Get the local graph nodes (46) with the ordering that corresponds to the sp-gies network (this may change between runs)
 local_nodes = pd.read_csv("local_graph/data_smaller_clr_subgraph_local_synthetic_n=10000_obs_int.csv", header=0).columns
 
-sp_gies_subnetwork_synth_local = pd.read_csv("local_graph/clr_skel_subgraph_local_sp-gies-adj_mat.csv", header=0).to_numpy()
-sp_gies_subgraph_synth_local = nx.from_numpy_array(sp_gies_subnetwork_synth_local, create_using=nx.DiGraph)
-mapping =  dict(zip(np.arange(len(sp_gies_subgraph_synth_local.nodes)), local_nodes))
-sp_gies_subgraph_synth_local = nx.relabel_nodes(sp_gies_subgraph_synth_local, mapping)
-
-sp_gies_subnetwork_synth_local_int = pd.read_csv("local_graph/clr_skel_subgraph_local_wint_sp-gies-adj_mat.csv", header=0).to_numpy()
-sp_gies_subgraph_synth_local_int = nx.from_numpy_array(sp_gies_subnetwork_synth_local_int, create_using=nx.DiGraph)
-mapping =  dict(zip(np.arange(len(sp_gies_subgraph_synth_local_int.nodes)), local_nodes))
-sp_gies_subgraph_synth_local_int = nx.relabel_nodes(sp_gies_subgraph_synth_local_int, mapping)
-
 # Get the positions of the local nodes to use for future plotting
 pos = nx.spring_layout(sp_gies_subgraph.subgraph(local_nodes), k=100/np.sqrt(len(local_nodes)), seed=42)
 node_size=[len(local_nodes[i])**2 * 60 for i in range(len(pos))]
 
-#  Local graph learned sp-gies network where input was the 188 node network
-nodes = nx.draw(sp_gies_subgraph.subgraph(local_nodes), pos=pos,node_color='#ADD8E6', node_size=node_size,with_labels=True)
-plt.show()
+sp_gies_local_graph_names = ["local_graph/clr_skel_subgraph_local_sp-gies-adj_mat.csv",
+                             "local_graph/clr_skel_subgraph_local_wint_sp-gies-adj_mat.csv",
+                             "local_graph/genie_skel_sp-gies-adj_mat.csv",
+                             "local_graph/clr_skel_subgraph_local_lamb0_sp-gies-adj_mat.csv",
+                             "local_graph/genie_adj.csv"]
+#fig, axs = plt.subplots(len(sp_gies_local_graph_names))
+for i,n in enumerate(sp_gies_local_graph_names):
+    if n == "local_graph/genie_adj.csv":
+        local = pd.read_csv(n, header=None).to_numpy()
+        local[local<=0.03] = 0
+    else:
+        local = pd.read_csv(n, header=0).to_numpy()
+    local_graph = nx.from_numpy_array(local, create_using=nx.DiGraph)
+    mapping =  dict(zip(np.arange(len(local_graph.nodes)), local_nodes))
+    local_graph = nx.relabel_nodes(local_graph, mapping)
+    # Local graph taken from learning over only 46 nodes with synethic data
+    nx.draw(local_graph.subgraph(local_nodes),pos=pos, node_color='#ADD8E6', node_size=node_size,
+            with_labels=True)
+    plt.show()
 
-# Local graph taken from learning over only 46 nodes with synethic data
-nx.draw(sp_gies_subgraph_synth_local.subgraph(local_nodes),pos=pos,node_color='#ADD8E6', node_size=node_size,with_labels=True)
-plt.show()
-
-# Local graph taken from learning over only 46 nodes with synethic data including internvetional samples
-nx.draw(sp_gies_subgraph_synth_local_int.subgraph(local_nodes), pos=pos,node_color='#ADD8E6', node_size=node_size,with_labels=True)
-plt.show()
+# #  Local graph learned sp-gies network where input was the 188 node network
+# nodes = nx.draw(sp_gies_subgraph.subgraph(local_nodes), pos=pos,node_color='#ADD8E6', node_size=node_size,with_labels=True)
+# plt.show()
 
 # Local graph taken clr learned network (1146 -> 46 noddes)
 nx.draw(clr_digraph.subgraph(local_nodes).to_undirected(), pos=pos,node_color='#ADD8E6', node_size=node_size,with_labels=True)

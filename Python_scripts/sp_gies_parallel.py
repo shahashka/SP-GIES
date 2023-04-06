@@ -49,7 +49,7 @@ def local_structure_learn(it, outdir):
     skel = pd.read_csv("{}/part_{}/skel.csv".format(outdir, it), header=None).to_numpy()
     target_map = pd.read_csv("{}/part_{}/map.csv".format(outdir, it), header=0)
     target_map = dict(zip(target_map.iloc[:, 0], target_map.iloc[:, 1]))
-    sp_gies(data, target_map, skel, "{}/part_{}/".format(outdir, it))
+    sp_gies(data, "{}/part_{}/".format(outdir, it), skel, target_map)
     return 0
 
 def partition(skeleton, data, outdir):
@@ -63,6 +63,7 @@ def partition(skeleton, data, outdir):
         np.savetxt("{}/part_{}/skel.csv".format(outdir,i), adj_mat.toarray(), delimiter=",")
         d.to_csv("{}/part_{}/data.csv".format(outdir,i), index=False)
         m.to_csv("{}/part_{}/map.csv".format(outdir, i), index=False)
+        print("Size of MB is {}".format(d.shape[1]))
     return 0
 
 
@@ -72,25 +73,28 @@ def skeleton(data, outdir):
     # Save adjacency matrix is outdir
 
     # Read cuPC generated skeleton
-    return pd.read_csv("../random_test_set_100_small/0_cupc-adj_mat.csv", header=0).to_numpy()
+    return pd.read_csv("../random_test_set_100_scale/cupc-adj_mat.csv", header=0).to_numpy()
 
 def resolve_global(outdir, num_partitions):
     # Read all dags in directory and create a global dag
     # Report number of conflicts
     edge_list = []
+    node_list = set()
     for i in range(num_partitions):
         adj_mat = pd.read_csv("{}/part_{}/sp-gies-adj_mat.csv".format(outdir, i), header=0).to_numpy()
         map = pd.read_csv("{}/part_{}/map.csv".format(outdir, i), header=0)
         nodes = map.iloc[:,0]
         nodes = ["G{}".format(i) for i in nodes]
+        node_list = node_list.union(nodes)
         edge_list += adj_to_edge(adj_mat, nodes)
     G = nx.DiGraph(edge_list)
+    G.add_nodes_from(node_list)
     print(0.5 * len( [ 1 for (u,v) in G.edges() if u in G[v] ] ))
     return G
 
 def global_structure_learn(data, outdir):
-    partitioned = True
-    locally_resolved = True
+    partitioned = False
+    locally_resolved = False
 
     if not partitioned:
         global_skel = skeleton(data, outdir)
@@ -98,7 +102,7 @@ def global_structure_learn(data, outdir):
 
     num_partitions = len(os.listdir(outdir))
     if not locally_resolved:
-        nthreads = 2
+        nthreads = 1
         func_partial = functools.partial(
             local_structure_learn,
             outdir=outdir
@@ -115,17 +119,17 @@ def global_structure_learn(data, outdir):
 
 
 if __name__ == '__main__':
-    data = pd.read_csv("../random_test_set_100_small/data_joint_0.csv", header=0)
-    sp_gies_network = pd.read_csv("../random_test_set_100_small/0_sp-gies-adj_mat.csv", header=0).to_numpy()
+    data = pd.read_csv("../random_test_set_100_scale/data_joint_0.csv", header=0)
+    sp_gies_network = pd.read_csv("../random_test_set_100_scale/sp-gies-adj_mat.csv", header=0).to_numpy()
     nodes = list(data.columns)
     nodes.remove('target')
     sp_gies_graph = adj_to_dag(sp_gies_network, nodes)
 
-    edges = pd.read_csv("../random_test_set_100_small/bn_network_0.csv", header=0)
+    edges = pd.read_csv("../random_test_set_100_scale/bn_network_0.csv", header=0)
     edges_pos = [(r['start'], r['end']) for i, r in edges.iterrows() if r['edge'] == 1]
     G_true = edge_to_dag(edges_pos)
 
-    outdir =  "./random_test_set_100_small/parallel_test"
+    outdir =  "./random_test_set_100_scale/parallel_test"
     if not os.path.exists(outdir):
         os.makedirs(outdir)
     G_est = global_structure_learn(data, outdir)

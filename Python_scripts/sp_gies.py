@@ -33,7 +33,8 @@ def cu_pc(data, outdir):
     skel = ro.r(rcode)
     ro.r.assign("skel", skel)
 
-    rcode = "write.csv(skel ,row.names = FALSE, file = paste({}, 'cupc-adj_mat.csv',sep = ''))".format(outdir)
+    rcode = "write.csv(skel,row.names = FALSE, file = paste('{}', 'cupc-adj_mat.csv',sep = ''))".format(outdir)
+    ro.r(rcode)
     return skel
 
 def sp_gies(data, outdir, skel=None, target_map=None):

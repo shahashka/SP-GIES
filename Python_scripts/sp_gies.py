@@ -66,14 +66,16 @@ def sp_gies(data, outdir, skel=None, target_map=None):
     nr, nc = fixed_gaps.shape
     FG = ro.r.matrix(fixed_gaps, nrow=nr, ncol=nc)
     ro.r.assign("fixed_gaps", FG)
+    if data.shape[1] > 1:
+        score = ro.r.new('GaussL0penIntScore', ro.r['data'], ro.r['targets'], ro.r['target_index'])
+        ro.r.assign("score", score)
+        result = pcalg.gies(ro.r['score'], fixedGaps=ro.r['fixed_gaps'], targets=ro.r['targets'], maxDegree=10)
+        ro.r.assign("result", result)
 
-    score = ro.r.new('GaussL0penIntScore', ro.r['data'], ro.r['targets'], ro.r['target_index'])
-    ro.r.assign("score", score)
-    result = pcalg.gies(ro.r['score'], fixedGaps=ro.r['fixed_gaps'], targets=ro.r['targets'], maxDegree=10)
-    ro.r.assign("result", result)
-
-    rcode = 'result$repr$weight.mat()'
-    adj_mat = ro.r(rcode)
+        rcode = 'result$repr$weight.mat()'
+        adj_mat = ro.r(rcode)
+    else:
+        adj_mat = np.zeros((1,1))
     ro.r.assign("adj_mat", adj_mat)
     rcode = 'write.csv(adj_mat, row.names = FALSE,' \
             ' file = paste("{}", "sp-gies-adj_mat.csv", sep=""))'.format(outdir)

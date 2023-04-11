@@ -49,8 +49,8 @@ run_from_file_sp_gies <- function(dataset_path, target_path, target_index_path, 
 # if save_pc is set to TRUE
 # Also prints the time to solution which includes calculating the sufficient statistics for the PC algorithm
 sp_gies <- function(dataset, targets, targets.index, save_path, save_pc=FALSE, max_degree=integer(0)) {
-    obs_inds = which(targets.index = 1)[1]
-    obs_dataset = dataset[obs_inds]
+    obs_inds = which(targets.index == 1)
+    obs_dataset = dataset[c(obs_inds),]
     tic()
     tic()
     corrolationMatrix <- cor(obs_dataset)

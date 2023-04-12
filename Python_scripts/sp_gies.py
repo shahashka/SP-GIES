@@ -11,7 +11,7 @@ pcalg = importr('pcalg')
 base = importr('base')
 
 def cu_pc(data, outdir):
-    with open("cupc/cuPC.R") as file:
+    with open("../cupc/cuPC.R") as file:
         string = ''.join(file.readlines())
     cupc = SignatureTranslatedAnonymousPackage(string, "cupc")
     ro.r.assign("data", data)
@@ -38,12 +38,15 @@ def cu_pc(data, outdir):
     return skel
 
 
-def sp_gies(data, outdir, skel=None, target_map=None):
+def sp_gies(data, outdir, skel=None, cupc=False, target_map=None):
     if skel is None:
-        obs_data = data.loc[data['target']==0]
-        obs_data = obs_data.drop(columns=['target'])
-        obs_data = obs_data.to_numpy()
-        skel = cu_pc(obs_data, outdir)
+        if cupc:
+            obs_data = data.loc[data['target']==0]
+            obs_data = obs_data.drop(columns=['target'])
+            obs_data = obs_data.to_numpy()
+            skel = cu_pc(obs_data, outdir)
+        else:
+            skel = np.ones((data.shape[1], data.shape[1]))
     fixed_gaps = np.array((skel == 0), dtype=int)
     target_index = data.loc[:, 'target'].to_numpy()
     if target_map is not None:

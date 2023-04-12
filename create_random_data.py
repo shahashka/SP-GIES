@@ -26,7 +26,7 @@ def get_args():
 # Create a random gaussian DAG and correposning observational dataset. Assume no prior information
 def get_random_graph_data(working_dir, graph_type, nsamples, n, parameters, toNormalize=False, seed=None, num_graphs=1,ivnodes=None):
     if graph_type == 'erdos_renyi':
-        random_graph_model = lambda nnodes: nx.erdos_renyi_graph(nnodes, p=parameters["p"], seed=seed)
+        random_graph_model = lambda nnodes: nx.erdos_renyi_graph(n, p=parameters["p"], seed=seed)
     elif graph_type == 'scale_free':
         random_graph_model = lambda nnodes: nx.barabasi_albert_graph(n, m=parameters['k'], seed=seed)
     elif graph_type == 'small_world':

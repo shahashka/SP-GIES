@@ -5,7 +5,7 @@ import networkx as nx
 import functools
 from concurrent.futures import ProcessPoolExecutor
 import os
-from utils import edge_to_dag, adj_to_edge, adj_to_dag, get_scores, get_random_graph_data
+from causal_learning.utils import edge_to_dag, adj_to_edge, adj_to_dag, get_scores, get_random_graph_data
 from sp_gies import sp_gies
 
 # PARALLEL STRUCTURE LEARNING
@@ -138,7 +138,7 @@ if __name__ == '__main__':
     for k in [2]:
         for p in [0.5]:
             outdir = "./parallel_test_set_100_scale_k={}".format(k)
-            arcs, data = get_random_graph_data("scale_free", n=100, nsamples=10000, iv_samples=100,
+            (arcs, _,_,_), data = get_random_graph_data("scale_free", n=100, nsamples=10000, iv_samples=100,
                                       p=p, k=k, save=True, outdir=outdir )
             sp_gies(data, outdir, skel=None, cupc=True)
             skel = pd.read_csv("{}/cupc-adj_mat.csv".format(outdir), header=0).to_numpy()

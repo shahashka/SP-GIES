@@ -124,7 +124,7 @@ def check_consistency_w_igsp(data, true_graph):
 # GES always finds the correct MEC
 # Weird that GSP does noe
 for n in [1000, 10000, 100000]:
-    arcs, data = get_random_graph_data("scale_free", n=10, nsamples=n, iv_samples=0, p=0.5, k=2)
+    (arcs,_,_,_), data = get_random_graph_data("scale_free", n=10, nsamples=n, iv_samples=0, p=0.5, k=2)
     print(n)
     G_true = DAG()
     G_true.add_nodes_from(["G{}".format(i+1) for i in range(data.shape[1]-1)])
@@ -134,7 +134,7 @@ for n in [1000, 10000, 100000]:
 
 # GIES does not necessarily find the right graph, depends on the graph!
 for i in [1, 10, 100, 1000]:
-    arcs, data = get_random_graph_data("scale_free", n=10, nsamples=10000, iv_samples=i, p=0.5, k=2)
+    (arcs,_,_,_), data = get_random_graph_data("scale_free", n=10, nsamples=10000, iv_samples=i, p=0.5, k=2)
     print(i, data.shape)
     G_true = DAG()
     G_true.add_nodes_from(["G{}".format(i+1) for i in range(data.shape[1]-1)])

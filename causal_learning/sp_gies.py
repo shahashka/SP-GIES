@@ -4,13 +4,22 @@ import rpy2.robjects as robjects
 from rpy2.robjects.packages import importr
 import rpy2.robjects as ro
 import rpy2.robjects.numpy2ri
-from utils import edge_to_dag, adj_to_edge, adj_to_dag, get_scores
-from rpy2.robjects.packages import SignatureTranslatedAnonymousPackage
+from causal_learning.utils import edge_to_dag, adj_to_edge, adj_to_dag, get_scores
 rpy2.robjects.numpy2ri.activate()
 pcalg = importr('pcalg')
 base = importr('base')
 
 def cu_pc(data, outdir):
+    '''
+      Python wrapper for cuPC. CUDA implementation of the PC algorithm
+
+               Parameters:
+                       data (numpy ndarray): Observational data with dimensions n x p
+                       outdir (str): Another decimal integer
+
+               Returns:
+                       np.ndarray representing the adjancency matrix for skeleton (CPDAG) with dimensions p x p
+       '''
     with open("../cupc/cuPC.R") as file:
         string = ''.join(file.readlines())
     cupc = SignatureTranslatedAnonymousPackage(string, "cupc")
@@ -39,6 +48,26 @@ def cu_pc(data, outdir):
 
 
 def sp_gies(data, outdir, skel=None, cupc=False, target_map=None):
+    '''
+      Python wrapper for SP-GIES. Uses skeleton estimation to restrict edge set to GIES learner
+
+               Parameters:
+                       data (pandas DataFrame): DataFrame containing observational and interventional samples.
+                                                Must contain a column named 'target' which specifies the index of the node
+                                                that was intervened on to obtain the sample (assumes single interventions only).
+                                                This indexes from 1 for R convenience.
+                                                For observational samples the corresponding target should be 0
+                       outdir (str): The directory to save the final adjacency matrix to
+                       skel (numpy ndarray): an optional initial skeleton with dimensions p x p
+                       cupc (bool): a flag to indicate if skeleton estimation should be done with cupc. If False
+                                    and no skel is specified, then assumed no skeleton i.e. reverts to GIES algorithm
+                       target_map (dict): An optional dictionary to map the 'target' column of the input dataset to the indices
+                                         in the dataframe. This is only needed for the parallel implmentation of SP-GIES where the
+                                        full graph is paritioned and indices need to be tracked
+
+               Returns:
+                       np.ndarray representing the adjancency matrix for the final learned graph
+       '''
     if skel is None:
         if cupc:
             obs_data = data.loc[data['target']==0]

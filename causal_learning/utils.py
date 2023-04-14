@@ -3,7 +3,9 @@ import numpy as np
 import itertools
 import cdt
 from sklearn.metrics import auc
-
+from graphical_models import rand, GaussDAG
+import causaldag as cd
+import pandas as pd
 def adj_to_edge(adj, nodes):
     edges = []
     for (row,col) in itertools.product(np.arange(adj.shape[0]), np.arange(adj.shape[1])):
@@ -68,13 +70,13 @@ def get_scores(alg_names, networks, ground_truth, get_sid=False):
             print("{} {} {} {}".format(name, shd, sid, auc))
 
 # Create a random gaussian DAG and correposning observational and interventional dataset.
-def get_random_graph_data(graph_type, n, nsamples, iv_samples, p, k, save=False, outdir=None):
+def get_random_graph_data(graph_type, n, nsamples, iv_samples, p, k, seed=42, save=False, outdir=None):
     if graph_type == 'erdos_renyi':
-        random_graph_model = lambda nnodes: nx.erdos_renyi_graph(n, p=p, seed=42)
+        random_graph_model = lambda nnodes: nx.erdos_renyi_graph(n, p=p, seed=seed)
     elif graph_type == 'scale_free':
-        random_graph_model = lambda nnodes: nx.barabasi_albert_graph(n, m=k, seed=42)
+        random_graph_model = lambda nnodes: nx.barabasi_albert_graph(n, m=k, seed=seed)
     elif graph_type == 'small_world':
-        random_graph_model = lambda nnodes: nx.watts_strogatz_graph(n, k=k, p=p, seed=42)
+        random_graph_model = lambda nnodes: nx.watts_strogatz_graph(n, k=k, p=p, seed=seed)
     else:
         print("Unsupported random graph")
         return
@@ -105,4 +107,4 @@ def get_random_graph_data(graph_type, n, nsamples, iv_samples, p, k, save=False,
         if not os.path.isdir(outdir):
             os.makedirs(outdir)
         df.to_csv("{}/data.csv".format(outdir), index=False)
-    return arcs, df
+    return (arcs, nodes, bias, var), df

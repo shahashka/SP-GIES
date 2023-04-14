@@ -4,7 +4,7 @@ import rpy2.robjects as robjects
 from rpy2.robjects.packages import importr
 import rpy2.robjects as ro
 import rpy2.robjects.numpy2ri
-from Python_scripts.utils import edge_to_dag, adj_to_edge, adj_to_dag, get_scores
+from causal_learning.utils import edge_to_dag, adj_to_edge, adj_to_dag, get_scores
 rpy2.robjects.numpy2ri.activate()
 pcalg = importr('pcalg')
 base = importr('base')

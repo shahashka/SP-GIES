@@ -42,7 +42,7 @@ def cu_pc(data, outdir):
     skel = ro.r(rcode)
     ro.r.assign("skel", skel)
 
-    rcode = "write.csv(skel,row.names = FALSE, file = paste('{}', 'cupc-adj_mat.csv',sep = ''))".format(outdir)
+    rcode = "write.csv(skel,row.names = FALSE, file = paste('{}/', 'cupc-adj_mat.csv',sep = ''))".format(outdir)
     ro.r(rcode)
     return skel
 
@@ -81,7 +81,7 @@ def sp_gies(data, outdir, skel=None, cupc=False, target_map=None):
     if target_map is not None:
         target_index = np.array([0 if i == 0 else target_map[i] + 1 for i in target_index])
     targets = np.unique(target_index)[1:]  # Remove 0 the observational target
-    target_index += 1  # R indexes from 1
+    target_index_R = target_index + 1  # R indexes from 1
     data = data.drop(columns=['target']).to_numpy()
 
     nr, nc = data.shape
@@ -93,7 +93,7 @@ def sp_gies(data, outdir, skel=None, cupc=False, target_map=None):
     T = ro.r(rcode)
     ro.r.assign("targets", T)
 
-    TI = ro.IntVector(target_index)
+    TI = ro.IntVector(target_index_R)
     ro.r.assign("target_index", TI)
 
     nr, nc = fixed_gaps.shape
@@ -111,6 +111,6 @@ def sp_gies(data, outdir, skel=None, cupc=False, target_map=None):
         adj_mat = np.zeros((1,1))
     ro.r.assign("adj_mat", adj_mat)
     rcode = 'write.csv(adj_mat, row.names = FALSE,' \
-            ' file = paste("{}", "sp-gies-adj_mat.csv", sep=""))'.format(outdir)
+            ' file = paste("{}/", "sp-gies-adj_mat.csv", sep=""))'.format(outdir)
     ro.r(rcode)
     return adj_mat

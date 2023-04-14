@@ -125,3 +125,4 @@ dependencies:
     - skrebate==0.62
     - statsmodels==0.13.5
     - threadpoolctl==3.1.0
+    - rpy2==3.5.10

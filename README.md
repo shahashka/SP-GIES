@@ -41,3 +41,6 @@ To replicate results from the paper run the following to get scores for GIES and
 ```
 python compare_algs.py
 ``` 
+
+A Python wrapper for SP-GIES is also available in causal_learning/sp_gies.py. 
+

@@ -133,7 +133,8 @@ if __name__ == '__main__':
         print("K={}".format(k))
         for p in [0.5]:
             outdir = "./parallel_test_set_100_scale_k={}".format(k)
-            arcs, data = get_random_graph_data("scale_free", n=100, nsamples=10000, iv_samples=10,
+            arcs, data = get_random_graph_data("scale_free", n=100, nsamples=10000, iv_samples=10, p=0.5, k=2)
+            (arcs, _,_,_), data = get_random_graph_data("scale_free", n=100, nsamples=10000, iv_samples=10,
                                       p=p, k=k, save=True, outdir=outdir )
             sp_gies(data, outdir, skel=None, cupc=True)
             skel = pd.read_csv("{}/cupc-adj_mat.csv".format(outdir), header=0).to_numpy()

@@ -66,3 +66,43 @@ def get_scores(alg_names, networks, ground_truth, get_sid=False):
             sid = cdt.metrics.SID(ground_truth, net) if get_sid else 0
             auc, pr = cdt.metrics.precision_recall(ground_truth, net)
             print("{} {} {} {}".format(name, shd, sid, auc))
+
+# Create a random gaussian DAG and correposning observational and interventional dataset.
+def get_random_graph_data(graph_type, n, nsamples, iv_samples, p, k, save=False, outdir=None):
+    if graph_type == 'erdos_renyi':
+        random_graph_model = lambda nnodes: nx.erdos_renyi_graph(n, p=p, seed=42)
+    elif graph_type == 'scale_free':
+        random_graph_model = lambda nnodes: nx.barabasi_albert_graph(n, m=k, seed=42)
+    elif graph_type == 'small_world':
+        random_graph_model = lambda nnodes: nx.watts_strogatz_graph(n, k=k, p=p, seed=42)
+    else:
+        print("Unsupported random graph")
+        return
+    dag = rand.directed_random_graph(n, random_graph_model)
+    nodes_inds = list(dag.nodes)
+    bias = np.random.normal(0,1,size=len(nodes_inds))
+    var = np.abs(np.random.normal(0,1,size=len(nodes_inds)))
+
+    bn = GaussDAG(nodes= nodes_inds, arcs=dag.arcs, biases=bias,variances=var)
+    data = bn.sample(nsamples)
+
+    nodes = ["G{}".format(d+1) for d in nodes_inds]
+    arcs = [("G{}".format(i+1),"G{}".format(j+1))  for i,j in dag.arcs]
+
+    df = pd.DataFrame(data=data, columns=nodes)
+    df['target'] = np.zeros(data.shape[0])
+
+    if iv_samples > 0:
+        i_data = []
+        for ind, i in enumerate(nodes_inds):
+            samples = bn.sample_interventional(cd.Intervention({i: cd.ConstantIntervention(val=0)}), iv_samples)
+            samples = pd.DataFrame(samples, columns=nodes)
+            samples['target'] = ind + 1
+            i_data.append(samples)
+        df_int = pd.concat(i_data)
+        df = pd.concat([df, df_int])
+    if save:
+        if not os.path.isdir(outdir):
+            os.makedirs(outdir)
+        df.to_csv("{}/data.csv".format(outdir), index=False)
+    return arcs, df

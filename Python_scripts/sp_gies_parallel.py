@@ -40,13 +40,15 @@ def markov_blankets(skeleton, data):
 
 def community_detection(skeleton, data):
     mrf = nx.from_numpy_array(skeleton)
-    communities = nx.community.girvan_newman(mrf)
-    communities = tuple(sorted(c) for c in next(communities))
+    #communities = nx.community.girvan_newman(mrf)
+    #communities = nx.community.louvain_communities(mrf)
+    communities = nx.community.label_propagation_communities(mrf)
+    #communities = tuple(sorted(c) for c in next(communities))
     comm_subgraphs = []
     data_local = []
     maps = []
     for c in communities:
-        columns = c
+        columns = list(c)
         comm_subgraphs.append(mrf.subgraph(columns))
         # filter rows for interventional samples that are in subgraph and are observational
         data_sub = data.loc[data['target'].isin(list(np.array(columns) + 1) + [0])]
@@ -65,7 +67,6 @@ def community_detection(skeleton, data):
 def local_structure_learn(it, outdir):
     # Run a structure learning algorithm on a subset of the data
     # algorithms in include GIES, IGSP, etc..
-    print(it)
     data = pd.read_csv("{}/part_{}/data.csv".format(outdir, it), header=0)
     skel = pd.read_csv("{}/part_{}/skel.csv".format(outdir, it), header=None).to_numpy()
     target_map = pd.read_csv("{}/part_{}/map.csv".format(outdir, it), header=0)
@@ -85,7 +86,7 @@ def partition(skeleton, data, outdir):
         d.to_csv("{}/part_{}/data.csv".format(outdir,i), index=False)
         m.to_csv("{}/part_{}/map.csv".format(outdir, i), index=False)
         print("Size of MB is {}".format(d.shape[1]))
-    return 0
+    return i+1
 
 def resolve_global(outdir, num_partitions):
     # Read all dags in directory and create a global dag
@@ -105,26 +106,19 @@ def resolve_global(outdir, num_partitions):
     return G
 
 def global_structure_learn(data, global_skel, outdir):
-    partitioned = False
-    locally_resolved = False
-
-    if not partitioned:
-        print("Number of edges in skeleton is {}".format(sum(sum(global_skel))))
-        partition(global_skel, data, outdir)
-
-    num_partitions = len(os.listdir(outdir))
-    if not locally_resolved:
-        nthreads = 1
-        func_partial = functools.partial(
-            local_structure_learn,
-            outdir=outdir
-        )
-        results = []
-        chunksize = max(1, num_partitions // nthreads)
-        print("Launching processes")
-        with ProcessPoolExecutor(max_workers=nthreads) as executor:
-            for result in executor.map(func_partial, np.arange(num_partitions), chunksize=chunksize):
-                results.append(result)
+    num_partitions = partition(global_skel, data, outdir)
+    
+    nthreads = 1
+    func_partial = functools.partial(
+        local_structure_learn,
+        outdir=outdir
+    )
+    results = []
+    chunksize = max(1, num_partitions // nthreads)
+    print("Launching processes")
+    with ProcessPoolExecutor(max_workers=nthreads) as executor:
+        for result in executor.map(func_partial, np.arange(num_partitions), chunksize=chunksize):
+            results.append(result)
     G = resolve_global(outdir, num_partitions)
     return G
 
@@ -135,10 +129,11 @@ if __name__ == '__main__':
     # Use 100 nodes, change p, k
     # Run SP-GIES and save CUPC skeleton
     # Then run global run, pass in parameters for skeleton
-    for k in [2]:
+    for k in [2,4,8,16]:
+        print("K={}".format(k))
         for p in [0.5]:
             outdir = "./parallel_test_set_100_scale_k={}".format(k)
-            arcs, data = get_random_graph_data("scale_free", n=100, nsamples=10000, iv_samples=100,
+            arcs, data = get_random_graph_data("scale_free", n=100, nsamples=10000, iv_samples=10,
                                       p=p, k=k, save=True, outdir=outdir )
             sp_gies(data, outdir, skel=None, cupc=True)
             skel = pd.read_csv("{}/cupc-adj_mat.csv".format(outdir), header=0).to_numpy()
@@ -148,34 +143,6 @@ if __name__ == '__main__':
             nodes.remove('target')
             G_sp_gies = adj_to_dag(G_sp_gies, nodes)
             G_est = global_structure_learn(data, skel, outdir)
-
+            print(G_true, G_est, G_sp_gies)
             print(get_scores(["PARALLEL-SP-GIES", "SP-GIES"], [G_est, G_sp_gies], G_true, get_sid=True))
-
-
-    # data = pd.read_csv("../random_test_set_100_scale/data_joint_0.csv", header=0)
-    # sp_gies_network = pd.read_csv("../random_test_set_100_scale/sp-gies-adj_mat.csv", header=0).to_numpy()
-    # nodes = list(data.columns)
-    # nodes.remove('target')
-    # sp_gies_graph = adj_to_dag(sp_gies_network, nodes)
-    #
-    # edges = pd.read_csv("../random_test_set_100_scale/bn_network_0.csv", header=0)
-    # edges_pos = [(r['start'], r['end']) for i, r in edges.iterrows() if r['edge'] == 1]
-    # G_true = edge_to_dag(edges_pos)
-
-    #Visualize for debugging
-    # pos=pos=nx.spring_layout(G_true)
-    # nx.draw(G_true,pos=pos )
-    # plt.show()
-    # skel = pd.read_csv("../random_test_set_100_scale/cupc-adj_mat.csv", header=0).to_numpy()
-    # mrf = nx.from_numpy_array(skel)
-    # mrf = nx.relabel_nodes(mrf, dict(zip(mrf.nodes, ["G{}".format(i+1) for i in mrf.nodes])))
-    # nx.draw(mrf, pos =pos )
-    # plt.show()
-
-    # outdir =  "./random_test_set_100_scale_gv/parallel_test"
-    # if not os.path.exists(outdir):
-    #     os.makedirs(outdir)
-    # G_est = global_structure_learn(data, outdir)
-    # print(G_true, G_est)
-    # print(get_scores(["PARALLEL-SP-GIES", "SP-GIES"], [G_est, sp_gies_graph], G_true, get_sid=True))
 

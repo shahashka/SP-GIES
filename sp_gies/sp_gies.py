@@ -21,9 +21,6 @@ def run_pc(data, outdir):
                Returns:
                        np.ndarray representing the adjancency matrix for skeleton (CPDAG) with dimensions p x p
        '''
-    with open("../cupc/cuPC.R") as file:
-        string = ''.join(file.readlines())
-    cupc = SignatureTranslatedAnonymousPackage(string, "cupc")
     ro.r.assign("data", data)
     rcode = 'cor(data)'
     corMat = ro.r(rcode)

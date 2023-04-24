@@ -110,7 +110,7 @@ def sp_gies(data, outdir, skel=None, pc=False):
             obs_data = data.loc[data['target']==0]
             obs_data = obs_data.drop(columns=['target'])
             obs_data = obs_data.to_numpy()
-            if os.exists("Skeleton.so"):
+            if os.path.exists("../R_scripts/Skeleton.so"):
                 skel = cu_pc(obs_data, outdir)
             else:
                 skel = pc(obs_data, outdir)

@@ -28,7 +28,7 @@ The repo contains three types of data located in the ```/data``` folder : (1) Ga
 To create random data, use the script ```examples/create_random_data.py```. For examples of usage, check ```examples/gen_scaling_data.sh```
 To create DREAM4 insilico data in the correct format run the following to create the correct csv files:
 ``` 
-python examples/convert_dream4.py -d insilico_size10_3 
+python examples/convert_dream4.py -d data/insilico_size10_3 
 ```
 
 ### Run

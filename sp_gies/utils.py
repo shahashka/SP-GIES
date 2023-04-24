@@ -53,7 +53,7 @@ def get_scores(alg_names, networks, ground_truth, get_sid=False):
                 shd += cdt.metrics.SHD(g, n, False)
                 sid += cdt.metrics.SID(g, n) if get_sid else 0
                 auc +=  cdt.metrics.precision_recall(g, n)[0]
-            print("{} {} {} {}".format(name, shd/len(net), sid/len(net), auc/len(net)))
+            print("{} SHD: {} SID: {} AUC: {}".format(name, shd/len(net), sid/len(net), auc/len(net)))
         elif type(net) != list and type(ground_truth) == list:
             shd = 0
             sid = 0
@@ -62,12 +62,12 @@ def get_scores(alg_names, networks, ground_truth, get_sid=False):
                 shd += cdt.metrics.SHD(g, net, False)
                 sid +=cdt.metrics.SID(g, net) if get_sid else 0
                 auc +=  cdt.metrics.precision_recall(g, net)[0]
-            print("{} {} {} {}".format(name, shd/len(ground_truth), sid/len(ground_truth), auc/len(ground_truth)))
+            print("{} SHD: {} SID: {} AUC: {}".format(name, shd/len(ground_truth), sid/len(ground_truth), auc/len(ground_truth)))
         else:
             shd = cdt.metrics.SHD(ground_truth, net, False)
             sid = cdt.metrics.SID(ground_truth, net) if get_sid else 0
             auc, pr = cdt.metrics.precision_recall(ground_truth, net)
-            print("{} {} {} {}".format(name, shd, sid, auc))
+            print("{} SHD: {} SID: {} AUC: {}".format(name, shd, sid, auc))
 
 # Create a random gaussian DAG and correposning observational and interventional dataset.
 def get_random_graph_data(graph_type, n, nsamples, iv_samples, p, k, seed=42, save=False, outdir=None):

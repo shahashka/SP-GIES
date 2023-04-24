@@ -8,7 +8,7 @@ num_graphs=30
 for (network in list('ER', 'scale', 'small')) {
     for (x in 0:(num_graphs-1)) {
     	print(x)
-        folder <- paste("../random_test_set_",num_nodes, "_", network, "/",sep="")
+        folder <- paste("../data/random_test_set_",num_nodes, "_", network, "/",sep="")
 	    dataset_OI_path <- paste(folder,"data_joint_", x,".csv", sep="")
         dataset <- read.table(dataset_OI_path, sep=",", header=TRUE)
         targets.index <- dataset[,ncol(dataset)]

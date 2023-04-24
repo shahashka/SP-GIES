@@ -22,25 +22,42 @@ Rscript install.R
 ```
 
 ### Data
-The repo contains three types of data: (1) Gaussian random data from Erdos Renyi, small-world and scale-free random networks.
+The repo contains three types of data located in the ```/data``` folder : (1) Gaussian random data from Erdos Renyi, small-world and scale-free random networks.
 (2) DREAM4 insilico network challenge (https://www.synapse.org/#!Synapse:syn3049712/wiki/74628) (3) RegulonDB gene regulatory network dataset (http://regulondb.ccg.unam.mx/)
 
-To create random data, use the script ```create_random_data.py```. For examples of usage, check ```gen_scaling_data.sh```
+To create random data, use the script ```examples/create_random_data.py```. For examples of usage, check ```examples/gen_scaling_data.sh```
 To create DREAM4 insilico data in the correct format run the following to create the correct csv files:
 ``` 
-python convert_dream4.py -d insilico_size10_3 
+python examples/convert_dream4.py -d insilico_size10_3 
 ```
 
 ### Run
 To generate estimated graphs for each dataset (and for examples on how to run structure learners), use any of the 
-```run_``` scripts in the ```R_scripts/``` e.g.
+```run_``` scripts in the ```R_scripts/``` e.g. (note that you must run these from the ```R_scripts/``` directory )
 ```
 Rscript run_dream4.R
 ```
 To replicate results from the paper run the following to get scores for GIES and SP-GIES on each dataset
 ```
-python compare_algs.py
+python examples/compare_algs.py
 ``` 
 
-A Python wrapper for SP-GIES is also available in causal_learning/sp_gies.py. 
+For users intending to use SP-GIES on their own datasets, a Python wrapper for SP-GIES is also available in causal_learning/sp_gies.py. 
+For an example on how to use this wrapper, as well as the input file requirements, expected run time etc...see the Jupyter notebook ```examples/use_sp_gies.ipynb```
 
+## License
+
+sp-gies has a MIT license, as seen in the [`LICENSE.md`](https://github.com/shahashka/SP-GIES/blob/main/LICENSE.md) file.
+
+## Citation
+
+If you use this algorithm in your research, please cite this paper:
+
+```bibtex
+@article{shah2023causal,
+  title={Causal Discovery and Optimal Experimental Design for Genome-Scale Biological Network Recovery},
+  author={Shah, Ashka and Ramanathan, Arvind and Hayot-Sasson, Valerie and Stevens, Rick},
+  journal={arXiv preprint arXiv:2304.03210},
+  year={2023}
+}
+```

@@ -13,9 +13,9 @@ def edge_to_adj(edges, all_nodes):
     return adj_mat
 
 def run_regulon_db():
-    data = pd.read_csv("../regulondb/data_smaller.csv", header=None)
-    targets = pd.read_csv("../regulondb/targets.csv", header=None)
-    targets_index = pd.read_csv("../regulondb/target_index.csv", header=None)
+    data = pd.read_csv("../data/regulondb/data_smaller.csv", header=None)
+    targets = pd.read_csv("../data/regulondb/targets.csv", header=None)
+    targets_index = pd.read_csv("../data/regulondb/target_index.csv", header=None)
     obs_inds = targets_index.index[targets_index.iloc[:,0]==1]
     obs_data_no_targets = data.iloc[obs_inds].to_numpy()
     

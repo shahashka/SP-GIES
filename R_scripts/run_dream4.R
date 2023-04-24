@@ -4,7 +4,7 @@ source("SP-GIES.R")
 
 # Run DREAM4 insilico network 3
 x=3
-directory = paste("../insilico_size10_", x, "/", sep="")
+directory = paste("../data/insilico_size10_", x, "/", sep="")
 dataset_OI_path <- file.path(paste(directory, "/insilico_size10_", x, "_combine.csv", sep=""), fsep=.Platform$file.sep)
 dataset <- read.table(dataset_OI_path, sep=",", header=TRUE)
 targets.index <- dataset[,ncol(dataset)]

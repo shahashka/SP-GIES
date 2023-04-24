@@ -12,7 +12,7 @@ source("IGSP.R")
 
 run_sp_gies <- function(num_nodes, max_degree) {
     # # read data
-    dataset_path <- file.path(paste("../random_test_set_scaling_",as.character(num_nodes),"_small/data_joint_0.csv", sep=""), fsep=.Platform$file.sep)
+    dataset_path <- file.path(paste("../data/random_test_set_scaling_",as.character(num_nodes),"_small/data_joint_0.csv", sep=""), fsep=.Platform$file.sep)
     dataset <- read.table(dataset_path, sep=",", header=TRUE)
     # load target, target index files
     targets.index <- dataset[,ncol(dataset)]
@@ -27,7 +27,7 @@ run_sp_gies <- function(num_nodes, max_degree) {
 
 run_gies <- function(num_nodes, max_degree) {
     # # read data
-    dataset_path <- file.path(paste("../random_test_set_scaling_",as.character(num_nodes),"_small/data_joint_0.csv", sep=""), fsep=.Platform$file.sep)
+    dataset_path <- file.path(paste("../data/random_test_set_scaling_",as.character(num_nodes),"_small/data_joint_0.csv", sep=""), fsep=.Platform$file.sep)
     dataset <- read.table(dataset_path, sep=",", header=TRUE)
     # load target, target index files
     targets.index <- dataset[,ncol(dataset)]
@@ -41,8 +41,8 @@ run_gies <- function(num_nodes, max_degree) {
 }
 
 run_igsp <- function(num_nodes) {
-    obs_dataset_path <- file.path(paste("../random_test_set_scaling_",as.character(num_nodes),"_small/data_0.csv", sep=""), fsep=.Platform$file.sep)
-    int_dataset_path <- file.path(paste("../random_test_set_scaling_",as.character(num_nodes),"_small/interventional_data_0.csv", sep=""), fsep=.Platform$file.sep)
+    obs_dataset_path <- file.path(paste("../data/random_test_set_scaling_",as.character(num_nodes),"_small/data_0.csv", sep=""), fsep=.Platform$file.sep)
+    int_dataset_path <- file.path(paste("../data/random_test_set_scaling_",as.character(num_nodes),"_small/interventional_data_0.csv", sep=""), fsep=.Platform$file.sep)
     obs_data = read.table(obs_dataset_path, sep=",", header=TRUE)
     obs_data <- obs_data[,1:ncol(obs_data)-1]
 

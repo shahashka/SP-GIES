@@ -3,7 +3,7 @@ source("GIES.R")
 source("SP-GIES.R")
 
 # Run small world random network small world size 1000
-folder <- "../random_test_set_scaling_1000_small/"
+folder <- "../data/random_test_set_scaling_1000_small/"
 x=0
 dataset_OI_path <- paste(folder,"data_joint_", x,".csv", sep="")
 dataset <- read.table(dataset_OI_path, sep=",", header=TRUE)

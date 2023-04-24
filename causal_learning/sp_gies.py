@@ -47,7 +47,7 @@ def cu_pc(data, outdir):
     return skel
 
 
-def sp_gies(data, outdir, skel=None, cupc=False, target_map=None):
+def sp_gies(data, outdir, skel=None, cupc=False):
     '''
       Python wrapper for SP-GIES. Uses skeleton estimation to restrict edge set to GIES learner
 
@@ -61,10 +61,6 @@ def sp_gies(data, outdir, skel=None, cupc=False, target_map=None):
                        skel (numpy ndarray): an optional initial skeleton with dimensions p x p
                        cupc (bool): a flag to indicate if skeleton estimation should be done with cupc. If False
                                     and no skel is specified, then assumed no skeleton i.e. reverts to GIES algorithm
-                       target_map (dict): An optional dictionary to map the 'target' column of the input dataset to the indices
-                                         in the dataframe. This is only needed for the parallel implmentation of SP-GIES where the
-                                        full graph is paritioned and indices need to be tracked
-
                Returns:
                        np.ndarray representing the adjancency matrix for the final learned graph
        '''
@@ -78,8 +74,6 @@ def sp_gies(data, outdir, skel=None, cupc=False, target_map=None):
             skel = np.ones((data.shape[1], data.shape[1]))
     fixed_gaps = np.array((skel == 0), dtype=int)
     target_index = data.loc[:, 'target'].to_numpy()
-    if target_map is not None:
-        target_index = np.array([0 if i == 0 else target_map[i] + 1 for i in target_index])
     targets = np.unique(target_index)[1:]  # Remove 0 the observational target
     target_index_R = target_index + 1  # R indexes from 1
     data = data.drop(columns=['target']).to_numpy()

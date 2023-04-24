@@ -10,7 +10,7 @@ rpy2.robjects.numpy2ri.activate()
 pcalg = importr('pcalg')
 base = importr('base')
 
-def pc(data, outdir):
+def run_pc(data, outdir):
     '''
       Python wrapper for PC.
 
@@ -113,7 +113,7 @@ def sp_gies(data, outdir, skel=None, pc=False):
             if os.path.exists("../R_scripts/Skeleton.so"):
                 skel = cu_pc(obs_data, outdir)
             else:
-                skel = pc(obs_data, outdir)
+                skel = run_pc(obs_data, outdir)
         else:
             skel = np.ones((data.shape[1], data.shape[1]))
     fixed_gaps = np.array((skel == 0), dtype=int)

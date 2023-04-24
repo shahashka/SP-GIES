@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+import os
 import rpy2.robjects as robjects
 from rpy2.robjects.packages import importr
 import rpy2.robjects as ro
@@ -8,6 +9,44 @@ from rpy2.robjects.packages import SignatureTranslatedAnonymousPackage
 rpy2.robjects.numpy2ri.activate()
 pcalg = importr('pcalg')
 base = importr('base')
+
+def pc(data, outdir):
+    '''
+      Python wrapper for PC.
+
+               Parameters:
+                       data (numpy ndarray): Observational data with dimensions n x p
+                       outdir (str): Another decimal integer
+
+               Returns:
+                       np.ndarray representing the adjancency matrix for skeleton (CPDAG) with dimensions p x p
+       '''
+    with open("../cupc/cuPC.R") as file:
+        string = ''.join(file.readlines())
+    cupc = SignatureTranslatedAnonymousPackage(string, "cupc")
+    ro.r.assign("data", data)
+    rcode = 'cor(data)'
+    corMat = ro.r(rcode)
+    ro.r.assign("corrolationMatrix", corMat)
+
+    p = data.shape[1]
+    ro.r.assign("p",p)
+
+    rcode = 'list(C = corrolationMatrix, n = nrow(data))'
+    suffStat = ro.r(rcode)
+    ro.r.assign("suffStat", suffStat)
+
+    rcode = 'pc(suffStat,p=p,indepTest=gaussCItest,skel.method="stable.fast",alpha=0.05)'
+    pc_fit = ro.r(rcode)
+    ro.r.assign("pc_fit", pc_fit)
+
+    rcode = 'as(pc_fit@graph, "matrix")'
+    skel = ro.r(rcode)
+    ro.r.assign("skel", skel)
+
+    rcode = "write.csv(skel,row.names = FALSE, file = paste('{}/', 'pc-adj_mat.csv',sep = ''))".format(outdir)
+    ro.r(rcode)
+    return skel
 
 def cu_pc(data, outdir):
     '''
@@ -47,7 +86,7 @@ def cu_pc(data, outdir):
     return skel
 
 
-def sp_gies(data, outdir, skel=None, cupc=False):
+def sp_gies(data, outdir, skel=None, pc=False):
     '''
       Python wrapper for SP-GIES. Uses skeleton estimation to restrict edge set to GIES learner
 
@@ -59,17 +98,22 @@ def sp_gies(data, outdir, skel=None, cupc=False):
                                                 For observational samples the corresponding target should be 0
                        outdir (str): The directory to save the final adjacency matrix to
                        skel (numpy ndarray): an optional initial skeleton with dimensions p x p
-                       cupc (bool): a flag to indicate if skeleton estimation should be done with cupc. If False
-                                    and no skel is specified, then assumed no skeleton i.e. reverts to GIES algorithm
+                       pc (bool): a flag to indicate if skeleton estimation should be done with the PC. If False
+                                    and no skel is specified, then assumed no skeleton i.e. reverts to GIES algorithm.
+                                    Will use the GPU accelerated version of the PC if avaiable, otherwise reverts to pcalg
+                                    implementation of PC
                Returns:
                        np.ndarray representing the adjancency matrix for the final learned graph
        '''
     if skel is None:
-        if cupc:
+        if pc:
             obs_data = data.loc[data['target']==0]
             obs_data = obs_data.drop(columns=['target'])
             obs_data = obs_data.to_numpy()
-            skel = cu_pc(obs_data, outdir)
+            if os.exists("Skeleton.so"):
+                skel = cu_pc(obs_data, outdir)
+            else:
+                skel = pc(obs_data, outdir)
         else:
             skel = np.ones((data.shape[1], data.shape[1]))
     fixed_gaps = np.array((skel == 0), dtype=int)

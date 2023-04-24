@@ -3,7 +3,7 @@ import numpy as np
 import argparse
 import pandas as pd
 import os
-from causal_learning.utils import get_random_graph_data
+from sp_gies.utils import get_random_graph_data
 # Script to generate random data from a random network either Erdos Renyi, scale-free or small world
 # Specify the number of samples, number of nodes and number of graphs needed
 def get_args():

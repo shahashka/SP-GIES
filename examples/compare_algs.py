@@ -6,7 +6,7 @@ import itertools
 import warnings
 import time
 
-from causal_learning.utils import get_scores, edge_to_dag, edge_to_adj, adj_to_dag
+from sp_gies.utils import get_scores, edge_to_dag, edge_to_adj, adj_to_dag
 warnings.filterwarnings("ignore")
 font = {'family' : 'normal',
         'weight' : 'bold',

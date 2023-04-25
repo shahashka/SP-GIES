@@ -8,15 +8,15 @@ from sp_gies.utils import get_random_graph_data
 # Specify the number of samples, number of nodes and number of graphs needed
 def get_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--random_graph', type=str)
-    parser.add_argument('--p', type=float, default=0.5)
-    parser.add_argument('--k', type=int, default=2)
-    parser.add_argument('--nsamples', type=int)
-    parser.add_argument('--nnodes', type=int)
-    parser.add_argument('--seed', type=int)
-    parser.add_argument('--working_dir', type=str)
-    parser.add_argument('--num_graphs',type=int)
-    parser.add_argument('--ivnodes', type=int, default=1)
+    parser.add_argument('--random_graph', type=str, help='type of random graph: erdos_renyi, small_world or scale_free')
+    parser.add_argument('--p', type=float, default=0.5, help='for erdos renyi and small_world networks, p is the probability of edge existence between 2 nodes')
+    parser.add_argument('--k', type=int, default=2, help='for small_world and scale free k is the number of initial nodes, roughly corresponds to the number of hubs in the final graph')
+    parser.add_argument('--nsamples', type=int, help='number of observational samples')
+    parser.add_argument('--nnodes', type=int, help='number of nodes in the graph')
+    parser.add_argument('--seed', type=int, help='optional random seed')
+    parser.add_argument('--working_dir', type=str, help='working directory to save output files')
+    parser.add_argument('--num_graphs',type=int, help='number of random graphs to generate')
+    parser.add_argument('--ivnodes', type=int, default=1, help='number of interventional samples per node')
     return parser.parse_args()
 
 # Create a random gaussian DAG and correposning observational dataset. Assume no prior information

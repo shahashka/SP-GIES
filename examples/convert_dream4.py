@@ -7,7 +7,7 @@ import numpy as np
 # Choose the directories for where the original .tsv data is located
 def get_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument('-d', '--directories', nargs='+', default=[], help='List of directories ')
+    parser.add_argument('-d', '--directories', nargs='+', default=[], help='List of directories to convert to right file format')
     return parser.parse_args()
 
 # Creates .txt versions of the data used for the ARACNE-AP and CLR algorithms

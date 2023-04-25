@@ -5,10 +5,16 @@ CLR to estimate the skeleton. Step (2) uses GIES with the skeleton as input to r
 This achieves up to 4x speedup compared to GIES. 
 
 ### Setup
+Clone the repository:
+```
+git clone https://github.com/shahashka/SP-GIES.git
+
+```
 Create conda environment using:
 ```
 conda env create --name <name> --file=environment.yml 
 ```
+
 To use the cupc and CDT submodules, initialize after cloning and compile:
 ```
 git submodule init
@@ -43,7 +49,8 @@ python examples/compare_algs.py
 ``` 
 
 For users intending to use SP-GIES on their own datasets, a Python wrapper for SP-GIES is also available in causal_learning/sp_gies.py. 
-For an example on how to use this wrapper, as well as the input file requirements, expected run time etc...see the Jupyter notebook ```examples/use_sp_gies.ipynb```
+For an example on how to use this wrapper, as well as the input file requirements, expected run time etc...see the Jupyter notebook 
+[`use_sp_gies.ipynb`](https://github.com/shahashka/SP-GIES/blob/main/examples/use_sp_gies.ipynb)
 
 ## License
 

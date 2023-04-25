@@ -8,7 +8,6 @@ This achieves up to 4x speedup compared to GIES.
 Clone the repository:
 ```
 git clone https://github.com/shahashka/SP-GIES.git
-
 ```
 Create conda environment using:
 ```

@@ -26,6 +26,13 @@ To install relevant R packages use the installation script in R:
 Rscript install.R
 ```
 
+### Installation
+To install the package from source, execute the following command from the root of the cloned repository:
+
+```
+python -m pip install .
+```
+
 ### Data
 The repo contains three types of data located in the ```/data``` folder : (1) Gaussian random data from Erdos Renyi, small-world and scale-free random networks.
 (2) DREAM4 insilico network challenge (https://www.synapse.org/#!Synapse:syn3049712/wiki/74628) (3) RegulonDB gene regulatory network dataset (http://regulondb.ccg.unam.mx/)

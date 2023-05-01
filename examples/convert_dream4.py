@@ -2,6 +2,8 @@ import pandas as pd
 import argparse
 import numpy as np
 
+from os import path as op
+
 # Script to convert the DREAM4 challenge data into a format that can be used by joint structure learners
 
 # Choose the directories for where the original .tsv data is located
@@ -28,13 +30,13 @@ def create_text_files(dir,df,filename):
 # and combined observational and interventional dataset respectively
 # Also performs standard normalization
 def convert_to_csv(dir):
-    name = dir.split("/")[1]
-    df_network = pd.read_csv("{}/{}_goldstandard.tsv".format(dir,name), sep='\t', names=['start','end', 'edge'],header=0)
-    df_network.to_csv("{}/{}_goldstandard.csv".format(dir,name), index=False)
-    df_wild = pd.read_csv("{}/{}_wildtype.tsv".format(dir,name), sep='\t', header=0)
+    basename = op.basename(d)
+    df_network = pd.read_csv("{}/{}_goldstandard.tsv".format(dir,basename), sep='\t', names=['start','end', 'edge'],header=0)
+    df_network.to_csv("{}/{}_goldstandard.csv".format(dir,basename), index=False)
+    df_wild = pd.read_csv("{}/{}_wildtype.tsv".format(dir,basename), sep='\t', header=0)
 
-    df_time = pd.read_csv("{}/{}_timeseries.tsv".format(dir,name), sep='\t', header=0)
-    df_mult = pd.read_csv("{}/{}_multifactorial.tsv".format(dir,name),sep='\t', header=0)
+    df_time = pd.read_csv("{}/{}_timeseries.tsv".format(dir,basename), sep='\t', header=0)
+    df_mult = pd.read_csv("{}/{}_multifactorial.tsv".format(dir,basename),sep='\t', header=0)
 
     df_time_unperturb = df_time[(df_time["Time"] > 500) & (df_time["Time"] <= 1000)].drop(columns="Time")
     df_obs = pd.concat([df_wild,df_mult,df_time_unperturb])
@@ -47,11 +49,12 @@ def convert_to_csv(dir):
     create_text_files(dir,df_obs, "data_obs")
 
     df_obs['target'] = np.zeros(df_obs.shape[0])
-    df_obs.to_csv("{}/{}_obs.csv".format(dir,name), index=False)
+    df_obs.to_csv("{}/{}_obs.csv".format(dir,basename), index=False)
 
     # Normalize interventional data separately
-    df_ko = pd.read_csv("{}/{}_knockouts.tsv".format(dir,name), sep='\t', header=0)
-    df_kd = pd.read_csv("{}/{}_knockdowns.tsv".format(dir,name), sep='\t', header=0)
+    df_ko = pd.read_csv("{}/{}_knockouts.tsv".format(dir,basename), sep='\t', header=0)
+    df_kd = pd.read_csv("{}/{}_knockdowns.tsv".format(dir,basename), sep='\t', header=0)
+
     df_inter = pd.concat([df_ko, df_kd])
     mean = df_inter.mean(axis=0)
     stddev = df_inter.std(axis=0)
@@ -60,7 +63,7 @@ def convert_to_csv(dir):
     targets = np.arange(1,df_ko.shape[0]+1)
     df_inter['target'] = np.concatenate([targets, targets])
     df_combine = pd.concat([df_obs, df_inter])
-    df_combine.to_csv("{}/{}_combine.csv".format(dir,name), index=False)
+    df_combine.to_csv("{}/{}_combine.csv".format(dir,basename), index=False)
     create_text_files(dir,df_combine, "data_combine")
 
 args = get_args()

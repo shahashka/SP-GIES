@@ -33,7 +33,7 @@ def run_pc(data, outdir):
     suffStat = ro.r(rcode)
     ro.r.assign("suffStat", suffStat)
 
-    rcode = 'pc(suffStat,p=p,indepTest=gaussCItest,skel.method="stable.fast",alpha=0.05)'
+    rcode = 'pc(suffStat,p=p,indepTest=gaussCItest,skel.method="stable.fast",alpha=0.001)'
     pc_fit = ro.r(rcode)
     ro.r.assign("pc_fit", pc_fit)
 
@@ -71,7 +71,7 @@ def cu_pc(data, outdir):
     suffStat = ro.r(rcode)
     ro.r.assign("suffStat", suffStat)
 
-    cuPC_fit = cupc.cu_pc(ro.r['suffStat'],p=ro.r['p'],alpha=0.05)
+    cuPC_fit = cupc.cu_pc(ro.r['suffStat'],p=ro.r['p'],alpha=0.001)
     ro.r.assign("cuPC_fit", cuPC_fit)
 
     rcode = 'as(cuPC_fit@graph, "matrix")'

@@ -160,7 +160,7 @@ def test_random_large():
     get_scores(["PC-O", "GES-O", "GIES-OI", "SP-GIES-OI", "NULL"],
                [pc_graph, gies_o_graph, gies_graph, sp_gies_graph,  np.zeros((num_nodes, num_nodes))], true_graph)
     
-test_regulondb()
+#test_regulondb()
 test_random()
 test_dream4()
-test_random_large()
+#test_random_large()

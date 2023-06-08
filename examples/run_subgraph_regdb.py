@@ -33,6 +33,7 @@ def run_linear_methods(ground_truth):
     data['target'] = np.zeros(data.shape[0])
     gies_adj = sp_gies(data, outdir, skel=None, pc=False)
     skel = pd.read_csv(outdir+"clr_skel.csv", header=None).to_numpy()
+    skel = skel+skel.T
     sp_gies_adj = sp_gies(data, outdir, skel=skel, pc=True)
 
     get_scores(["PC", "CLR", "GIES", "SP-GIES"], [pc_adj,skel, gies_adj, sp_gies_adj], ground_truth, get_sid=True)
@@ -42,6 +43,7 @@ def run_nonparametric_methods(ground_truth):
     outdir = "./data/regulondb/local_graph/"
     data = pd.read_csv(outdir+"data.csv", header=0)
     skel = pd.read_csv(outdir+"clr_skel.csv", header=None).to_numpy()
+    skel = skel+skel.T
     fixed_gaps = set()
     fixed_adjacencies = set()
     for i,j in itertools.product(np.arange(skel.shape[0]), np.arange(skel.shape[1])):
@@ -86,7 +88,7 @@ def run_nonlinear_methods(ground_truth):
 genes = pd.read_csv("./data/regulondb/local_graph/local_nodes.csv", header=None).to_numpy()
 genes = [g[0] for g in genes]
 map = dict(zip(np.arange(len(genes)),genes))
-global_gt = pd.read_csv("./data/regulondb/ground_truth.csv",header=None).to_numpy()
+global_gt = pd.read_csv("./data/regulondb/ground_truth.csv",header=None).to_numpy().T
 gt = nx.DiGraph(global_gt)
 
 genes_global = pd.read_csv("./data/regulondb/genes.txt", header=None).to_numpy()

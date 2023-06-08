@@ -19,11 +19,11 @@ os.environ['CUDA_VISIBLE_DEVICES']="7"
 # Nonparametric methods: GSP
 
 # %%
-def vis_network(adj_mat, pos,map):
+def vis_network(adj_mat, pos,map,name):
     graph = nx.DiGraph(adj_mat)
     graph = nx.relabel_nodes(graph, map)
     nx.draw(graph, pos=pos, with_labels=True)
-    plt.show()
+    plt.savefig("{}.png".format(name))
 
 def run_linear_methods(ground_truth):
     outdir = "./data/regulondb/local_graph/"
@@ -98,12 +98,14 @@ gt = nx.DiGraph(local_gt)
 gt = nx.relabel_nodes(gt, map)
 print(gt)
 pos = nx.circular_layout(gt)
-vis_network(local_gt, pos, map)
+vis_network(local_gt, pos, map, 'ground_truth')
 graphs = []
 graphs += run_linear_methods(local_gt)
+graphs += run_nonlinear_methods(local_gt)
 graphs.append(run_nonparametric_methods(local_gt))
-for g in graphs:
-    vis_network(g, pos,map)
+names = ["pc", "clr", "gies", "sp_gies", "notears", "notears_mlp", "avici", "gsp"]
+for g,n in zip(graphs,names):
+    vis_network(g, pos,map, n)
 
 
 #run_nonlinear_methods()

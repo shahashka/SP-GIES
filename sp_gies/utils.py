@@ -40,7 +40,6 @@ def edge_to_dag(edges):
     dag = nx.DiGraph()
     dag.add_edges_from(edges)
     return dag
-
 def tpr_score(y_true, y_pred):
     if type(y_pred) == nx.DiGraph:
         y_pred = nx.adjacency_matrix(y_pred)
@@ -48,11 +47,10 @@ def tpr_score(y_true, y_pred):
     if type(y_true) == nx.DiGraph:
         y_true = nx.adjacency_matrix(y_true)
         y_true=y_true.todense()
-    y_pred = np.array(y_pred != 0, dtype=int)
-    y_true = np.array(y_true != 0, dtype=int)
+    y_pred = np.array(y_pred != 0, dtype=int).flatten()
+    y_true = np.array(y_true != 0, dtype=int).flatten()
     fpr, tpr, _= roc_curve(y_true.flatten(), y_pred.flatten())
-    print(tpr, fpr)
-    return tpr[1]
+    return tpr[1], fpr[1]
 
 # Helper function to print the SHD, SID, AUC for a set of algorithms and networks
 # Also handles averaging over several sets of networks (e.g the random comparison averages over 30 different generated graphs)
@@ -63,11 +61,12 @@ def get_scores(alg_names, networks, ground_truth, get_sid=False):
             shd = 0
             sid = 0
             auc = 0
-            tpr = 0
+            tpr_fpr = [0,0]
             for n,g in zip(net, ground_truth):
                 shd += cdt.metrics.SHD(g, n, False)
                 sid += cdt.metrics.SID(g, n) if get_sid else 0
-                tpr += tpr_score(g,n)
+                if name!='NULL':
+                    tpr_fpr += tpr_score(g,n)
                 auc +=  cdt.metrics.precision_recall(g, n)[0]
             print("{} SHD: {} SID: {} AUC: {} TPR: {}".format(name, shd/len(net), sid/len(net), auc/len(net), tpr/len(net)))
         elif type(net) != list and type(ground_truth) == list:
@@ -78,15 +77,18 @@ def get_scores(alg_names, networks, ground_truth, get_sid=False):
                 shd += cdt.metrics.SHD(g, net, False)
                 sid +=cdt.metrics.SID(g, net) if get_sid else 0
                 auc +=  cdt.metrics.precision_recall(g, net)[0]
-                tpr += tpr_score(g,n)
-    
+                if name!='NULL':
+                    tpr_fpr += tpr_score(g,n)
             print("{} SHD: {} SID: {} AUC: {} TPR: {}".format(name, shd/len(ground_truth), sid/len(ground_truth), auc/len(ground_truth), tpr/len(ground_truth)))
         else:
             shd = cdt.metrics.SHD(ground_truth, net, False)
             sid = cdt.metrics.SID(ground_truth, net) if get_sid else 0
             auc, pr = cdt.metrics.precision_recall(ground_truth, net)
-            tpr = tpr_score(ground_truth, net)
-            print("{} SHD: {} SID: {} AUC: {}, TPR: {}".format(name, shd, sid, auc, tpr))
+            if name!='NULL':
+                tpr_fpr = tpr_score(ground_truth, net)
+            else :
+                tpr_fpr= [0,0]
+            print("{} SHD: {} SID: {} AUC: {}, TPR,FPR: {}".format(name, shd, sid, auc, tpr_fpr))
 
 # Create a random gaussian DAG and correposning observational and interventional dataset.
 def get_random_graph_data(graph_type, n, nsamples, iv_samples, p, k, seed=42, save=False, outdir=None):

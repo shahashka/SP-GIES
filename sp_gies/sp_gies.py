@@ -86,7 +86,7 @@ def cu_pc(data, outdir, alpha):
     return skel
 
 
-def sp_gies(data, outdir, skel=None, pc=False):
+def sp_gies(data, outdir, skel=None, pc=False, alpha=1e-3):
     '''
       Python wrapper for SP-GIES. Uses skeleton estimation to restrict edge set to GIES learner
 
@@ -111,9 +111,9 @@ def sp_gies(data, outdir, skel=None, pc=False):
             obs_data = obs_data.drop(columns=['target'])
             obs_data = obs_data.to_numpy()
             if os.path.exists("../R_scripts/Skeleton.so"):
-                skel = cu_pc(obs_data, outdir)
+                skel = cu_pc(obs_data, outdir, alpha)
             else:
-                skel = run_pc(obs_data, outdir)
+                skel = run_pc(obs_data, outdir,alpha)
         else:
             skel = np.ones((data.shape[1], data.shape[1]))
     fixed_gaps = np.array((skel == 0), dtype=int)

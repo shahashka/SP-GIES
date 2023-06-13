@@ -48,8 +48,8 @@ def tpr_score(y_true, y_pred):
     if type(y_true) == nx.DiGraph:
         y_true = nx.adjacency_matrix(y_true)
         y_true=y_true.todense()
-    y_pred = y_pred != 0
-    y_true = np.abs(y_true)
+    y_pred = np.array(y_pred != 0, dtype=int)
+    y_true = np.array(y_true != 0, dtype=int)
     fpr, tpr, _= roc_curve(y_true.flatten(), y_pred.flatten())
     print(tpr, fpr)
     return tpr[1]

@@ -136,7 +136,7 @@ def test_random():
 def test_random_large():
     n = 0
     num_nodes=1000
-    folder = "../data/random_test_set_scaling_1000_small"
+    folder = "../data/random_test_set_1000_small_more_ints"
     edges = pd.read_csv( "{}/bn_network_{}.csv".format(folder, n), header=0)
     df = pd.read_csv("{}/data_{}.csv".format(folder,n), header=0)
 
@@ -158,9 +158,9 @@ def test_random_large():
     gies_o_graph = adj_to_dag(gies_o_network, nodes)
 
     get_scores(["PC-O", "GES-O", "GIES-OI", "SP-GIES-OI", "NULL"],
-               [pc_graph, gies_o_graph, gies_graph, sp_gies_graph,  np.zeros((num_nodes, num_nodes))], true_graph)
-    
+               [pc_graph, gies_o_graph, gies_graph, sp_gies_graph,  np.zeros((num_nodes, num_nodes))], true_graph, get_sid=True)
+    #get_scores(["PC","SP-GIES"], [pc_graph,sp_gies_graph], true_graph, get_sid=True)
 #test_regulondb()
-test_random()
-test_dream4()
-#test_random_large()
+#test_random()
+#test_dream4()
+test_random_large()

@@ -11,8 +11,8 @@ import os
 import networkx as nx
 import matplotlib.pyplot as plt
 import itertools
+import torch
 os.environ['CASTLE_BACKEND'] = 'pytorch'
-os.environ['CUDA_VISIBLE_DEVICES']="7"
 # Test algorithms on subgraph data
 # Linear methods: GIES, PC, SP-GIES
 # Nonlinear methods:  AVICI, NOTEARS
@@ -24,11 +24,12 @@ def vis_network(adj_mat, pos,map,name):
     graph = nx.relabel_nodes(graph, map)
     nx.draw(graph, pos=pos, with_labels=True)
     plt.savefig("{}.png".format(name))
+    plt.clf()
 
 def run_linear_methods(ground_truth):
     outdir = "./data/regulondb/local_graph/"
     data = pd.read_csv(outdir+"data.csv", header=0)
-    pc_adj = run_pc(data.to_numpy(), outdir)
+    pc_adj = run_pc(data.to_numpy(), outdir, alpha=0.1)
 
     data['target'] = np.zeros(data.shape[0])
     gies_adj = sp_gies(data, outdir, skel=None, pc=False)
@@ -68,22 +69,22 @@ def run_nonlinear_methods(ground_truth):
     data = pd.read_csv(outdir+"data.csv", header=0).to_numpy()
 
     # NOTEARS NONLINEAR
-    nt = NotearsNonlinear()
-    nt.learn(data)
-    G_notears_nl = nt.causal_matrix
+#    nt = NotearsNonlinear(device_type='gpu', device_ids='0')
+#    nt.learn(data)
+#    G_notears_nl = nt.causal_matrix
 
     # NOTEARS                                                                                                          
-    nt = Notears()
-    nt.learn(data)
-    G_notears = nt.causal_matrix
+#    nt = Notears()
+#    nt.learn(data)
+#    G_notears = nt.causal_matrix
 
 
     #AVICI
-    model = avici.load_pretrained(download="scm-v0")
-    G_avici = model(data)
+    model = avici.load_pretrained(download="neurips-grn")
+    G_avici = model(data, return_probs=False)
 
-    get_scores(["NOTEARS", "NOTEARS-MLP", "AVICI"], [G_notears, G_notears_nl, G_avici], ground_truth, get_sid=True)
-    return G_notears, G_notears_nl, G_avici
+    get_scores([ "AVICI"], [G_avici], ground_truth, get_sid=True)
+    return G_avici
 # %%
 genes = pd.read_csv("./data/regulondb/local_graph/local_nodes.csv", header=None).to_numpy()
 genes = [g[0] for g in genes]

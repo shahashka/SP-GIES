@@ -6,6 +6,7 @@ from sklearn.metrics import auc
 from graphical_models import rand, GaussDAG
 import causaldag as cd
 import pandas as pd
+from sklearn.metrics import roc_curve
 def adj_to_edge(adj, nodes):
     edges = []
     for (row,col) in itertools.product(np.arange(adj.shape[0]), np.arange(adj.shape[1])):
@@ -40,6 +41,19 @@ def edge_to_dag(edges):
     dag.add_edges_from(edges)
     return dag
 
+def tpr_score(y_true, y_pred):
+    if type(y_pred) == nx.DiGraph:
+        y_pred = nx.adjacency_matrix(y_pred)
+        y_pred = y_pred.todense()
+    if type(y_true) == nx.DiGraph:
+        y_true = nx.adjacency_matrix(y_true)
+        y_true=y_true.todense()
+    y_pred = y_pred != 0
+    y_true = np.abs(y_true)
+    fpr, tpr, _= roc_curve(y_true.flatten(), y_pred.flatten())
+    print(tpr, fpr)
+    return tpr[1]
+
 # Helper function to print the SHD, SID, AUC for a set of algorithms and networks
 # Also handles averaging over several sets of networks (e.g the random comparison averages over 30 different generated graphs)
 # Default turn off sid, since it is computationally expensive
@@ -49,11 +63,13 @@ def get_scores(alg_names, networks, ground_truth, get_sid=False):
             shd = 0
             sid = 0
             auc = 0
+            tpr = 0
             for n,g in zip(net, ground_truth):
                 shd += cdt.metrics.SHD(g, n, False)
                 sid += cdt.metrics.SID(g, n) if get_sid else 0
+                tpr += tpr_score(g,n)
                 auc +=  cdt.metrics.precision_recall(g, n)[0]
-            print("{} SHD: {} SID: {} AUC: {}".format(name, shd/len(net), sid/len(net), auc/len(net)))
+            print("{} SHD: {} SID: {} AUC: {} TPR: {}".format(name, shd/len(net), sid/len(net), auc/len(net), tpr/len(net)))
         elif type(net) != list and type(ground_truth) == list:
             shd = 0
             sid = 0
@@ -62,12 +78,15 @@ def get_scores(alg_names, networks, ground_truth, get_sid=False):
                 shd += cdt.metrics.SHD(g, net, False)
                 sid +=cdt.metrics.SID(g, net) if get_sid else 0
                 auc +=  cdt.metrics.precision_recall(g, net)[0]
-            print("{} SHD: {} SID: {} AUC: {}".format(name, shd/len(ground_truth), sid/len(ground_truth), auc/len(ground_truth)))
+                tpr += tpr_score(g,n)
+    
+            print("{} SHD: {} SID: {} AUC: {} TPR: {}".format(name, shd/len(ground_truth), sid/len(ground_truth), auc/len(ground_truth), tpr/len(ground_truth)))
         else:
             shd = cdt.metrics.SHD(ground_truth, net, False)
             sid = cdt.metrics.SID(ground_truth, net) if get_sid else 0
             auc, pr = cdt.metrics.precision_recall(ground_truth, net)
-            print("{} SHD: {} SID: {} AUC: {}".format(name, shd, sid, auc))
+            tpr = tpr_score(ground_truth, net)
+            print("{} SHD: {} SID: {} AUC: {}, TPR: {}".format(name, shd, sid, auc, tpr))
 
 # Create a random gaussian DAG and correposning observational and interventional dataset.
 def get_random_graph_data(graph_type, n, nsamples, iv_samples, p, k, seed=42, save=False, outdir=None):

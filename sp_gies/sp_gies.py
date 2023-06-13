@@ -10,13 +10,14 @@ rpy2.robjects.numpy2ri.activate()
 pcalg = importr('pcalg')
 base = importr('base')
 
-def run_pc(data, outdir):
+def run_pc(data, outdir, alpha):
     '''
       Python wrapper for PC.
 
                Parameters:
                        data (numpy ndarray): Observational data with dimensions n x p
-                       outdir (str): Another decimal integer
+                       outdir (str): Path to save the adjacency matrix
+                       alpha (float): threshold for test statistic
 
                Returns:
                        np.ndarray representing the adjancency matrix for skeleton (CPDAG) with dimensions p x p
@@ -32,8 +33,9 @@ def run_pc(data, outdir):
     rcode = 'list(C = corrolationMatrix, n = nrow(data))'
     suffStat = ro.r(rcode)
     ro.r.assign("suffStat", suffStat)
+    ro.r.assign('alpha', alpha)
 
-    rcode = 'pc(suffStat,p=p,indepTest=gaussCItest,skel.method="stable.fast",alpha=0.1)'
+    rcode = 'pc(suffStat,p=p,indepTest=gaussCItest,skel.method="stable.fast",alpha=alpha)'
     pc_fit = ro.r(rcode)
     ro.r.assign("pc_fit", pc_fit)
 
@@ -45,18 +47,19 @@ def run_pc(data, outdir):
     ro.r(rcode)
     return skel
 
-def cu_pc(data, outdir):
+def cu_pc(data, outdir, alpha):
     '''
       Python wrapper for cuPC. CUDA implementation of the PC algorithm
 
                Parameters:
                        data (numpy ndarray): Observational data with dimensions n x p
-                       outdir (str): Another decimal integer
+                       outdir (str): Path to save the adjacency matrix
+                       alpha (float): threshold for test statistic
 
                Returns:
                        np.ndarray representing the adjancency matrix for skeleton (CPDAG) with dimensions p x p
        '''
-    with open("../cupc/cuPC.R") as file:
+    with open("./cupc/cuPC.R") as file:
         string = ''.join(file.readlines())
     cupc = SignatureTranslatedAnonymousPackage(string, "cupc")
     ro.r.assign("data", data)
@@ -71,7 +74,7 @@ def cu_pc(data, outdir):
     suffStat = ro.r(rcode)
     ro.r.assign("suffStat", suffStat)
 
-    cuPC_fit = cupc.cu_pc(ro.r['suffStat'],p=ro.r['p'],alpha=0.1)
+    cuPC_fit = cupc.cu_pc(ro.r['suffStat'],p=ro.r['p'],alpha=alpha)
     ro.r.assign("cuPC_fit", cuPC_fit)
 
     rcode = 'as(cuPC_fit@graph, "matrix")'
@@ -130,14 +133,17 @@ def sp_gies(data, outdir, skel=None, pc=False):
 
     TI = ro.IntVector(target_index_R)
     ro.r.assign("target_index", TI)
+    ro.r.assign("lambda", 0)
 
     nr, nc = fixed_gaps.shape
     FG = ro.r.matrix(fixed_gaps, nrow=nr, ncol=nc)
     ro.r.assign("fixed_gaps", FG)
     if data.shape[1] > 1:
+        #rcode = 'new("GaussL0penIntScore", data = data, targets=targets, target.index=target_index, lambda=0)'
+        #score = ro.r(rcode)
         score = ro.r.new('GaussL0penIntScore', ro.r['data'], ro.r['targets'], ro.r['target_index'])
         ro.r.assign("score", score)
-        result = pcalg.gies(ro.r['score'], fixedGaps=ro.r['fixed_gaps'], targets=ro.r['targets'], maxDegree=10)
+        result = pcalg.gies(ro.r['score'], fixedGaps=ro.r['fixed_gaps'], targets=ro.r['targets'])#, adaptive='triples')
         ro.r.assign("result", result)
 
         rcode = 'result$repr$weight.mat()'

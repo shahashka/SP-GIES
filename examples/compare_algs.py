@@ -22,18 +22,18 @@ matplotlib.rc('font', **font)
 def test_regulondb():
     print("REGULONDB")
     true_adj = pd.read_csv("./data/regulondb/ground_truth.csv", header=None).values
-    genes = [i[0] for i in pd.read_csv("../data/regulondb/genes.txt", header=None).values]
+    genes = [i[0] for i in pd.read_csv("./data/regulondb/genes.txt", header=None).values]
     true_graph = adj_to_dag(true_adj, all_nodes=genes)
 
     aracne_network = pd.read_csv("./data/regulondb/network.txt", sep='\t', header=0)
     clr_network = pd.read_csv("./data/regulondb/adj_mat.csv", header=None).to_numpy()
-    sp_gies_network = pd.read_csv("./data/regulondb/clr_skel_sp-gies-adj_mat.csv", header=0).to_numpy()
-    gies_network =  pd.read_csv("./data/regulondb/md_10_gies-adj_mat.csv", header=0).to_numpy()
-    gies_o_network =  pd.read_csv("./data/regulondb/obs_gies-adj_mat.csv", header=0).to_numpy()
-    pc_network = pd.read_csv("./data/regulondb/cupc-adj_mat.csv", header=0).to_numpy()
+    sp_gies_network = pd.read_csv("./regulondb/clr_skel_lamb0_sp-gies-adj_mat.csv", header=0).to_numpy()
+    gies_network =  pd.read_csv("./regulondb/md_10_gies-adj_mat.csv", header=0).to_numpy()
+    gies_o_network =  pd.read_csv("./regulondb/obs_gies-adj_mat.csv", header=0).to_numpy()
+    pc_network = pd.read_csv("./regulondb/cupc-adj_mat.csv", header=0).to_numpy()
 
     #  zero out gene->gene and gene-> tf interactions
-    with open('../data/regulondb/tfs.txt') as f:
+    with open('./data/regulondb/tfs.txt') as f:
         lines = f.readlines()
     tfs = lines[0].split("\t")
     edges_pos = [(row['Regulator'][1:-1], row['Target'][1:-1])
@@ -51,8 +51,8 @@ def test_regulondb():
     gies_graph = adj_to_dag(gies_network, genes)
     gies_o_graph = adj_to_dag(gies_o_network, genes)
 
-    get_scores(["ARACNE-AP", "CLR",  "SP-GIES-OI", "GIES-OI", "GES-O", "NULL"],
-               [aracne_graph, clr_graph, sp_gies_graph, gies_graph, gies_o_graph, 
+    get_scores(["ARACNE-AP", "CLR", "PC",  "SP-GIES-OI", "GIES-OI", "GES-O", "NULL"],
+               [aracne_graph, clr_graph, pc_graph, sp_gies_graph, gies_graph, gies_o_graph, 
                 np.zeros((len(genes), len(genes)))], true_graph)
 
 # Evaluate the performance of algorithms on the Dream4 size 10 network 3 dataset
@@ -159,7 +159,7 @@ def test_random_large():
 
     get_scores(["PC-O", "GES-O", "GIES-OI", "SP-GIES-OI", "NULL"],
                [pc_graph, gies_o_graph, gies_graph, sp_gies_graph,  np.zeros((num_nodes, num_nodes))], true_graph, get_sid=True)
-#test_regulondb()
+test_regulondb()
 #test_random()
 #test_dream4()
 test_random_large()
